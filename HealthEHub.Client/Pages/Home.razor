@@ -1,0 +1,47 @@
+﻿@page "/"
+@using HealthEHub.Models
+@inject HttpClient Http
+
+<PageTitle>Home</PageTitle>
+
+<div class="h-100 d-flex flex-column justify-content-center align-items-center">
+
+    <button class="btn btn-primary" @onclick="FetchExerciseData">Fetch Exercise Data</button>
+    @if (Exercisedata != null)
+    {
+        @foreach (var exercise in Exercisedata)
+        {
+            <p class="body-part">@exercise.BodyPart</p>
+            <p class="equipment">@exercise.Equipment</p>
+            <img src="@exercise.GifUrl" alt="Exercise Gif" title="GIF of exercise: @exercise.Name" />
+            <p class="id">@exercise.Id</p>
+            <p class="name">@exercise.Name</p>
+            <p class="target">@exercise.Target</p>
+            @if (exercise.SecondaryMuscles != null)
+            {
+                foreach (var muscle in exercise.SecondaryMuscles)
+                {
+                    <p class="secondary-muscles">@muscle</p>
+                }
+            }
+            @if (exercise.Instructions != null)
+            {
+                foreach (var instruction in exercise.Instructions)
+                {
+                    <p class="instructions">@instruction</p>
+                }
+            }
+        }
+
+    }
+</div>
+
+@code {
+
+    private Exercise[]? Exercisedata;
+
+    private async Task FetchExerciseData()
+    {
+        Exercisedata = await Http.GetFromJsonAsync<Exercise[]>("https://localhost:7024/exercisedata");
+    }
+}

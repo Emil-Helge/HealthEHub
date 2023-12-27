@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthEHub", "HealthEHub.csproj", "{004EE75F-B478-43D9-9708-433F34821435}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthEHub", "HealthEHub.Client\HealthEHub.csproj", "{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthEHub.API", "HealthEHub.API\HealthEHub.API.csproj", "{8C81DEE2-5949-43E1-9300-03B4A43EF52E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{004EE75F-B478-43D9-9708-433F34821435}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{004EE75F-B478-43D9-9708-433F34821435}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{004EE75F-B478-43D9-9708-433F34821435}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{004EE75F-B478-43D9-9708-433F34821435}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C81DEE2-5949-43E1-9300-03B4A43EF52E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C81DEE2-5949-43E1-9300-03B4A43EF52E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C81DEE2-5949-43E1-9300-03B4A43EF52E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C81DEE2-5949-43E1-9300-03B4A43EF52E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
