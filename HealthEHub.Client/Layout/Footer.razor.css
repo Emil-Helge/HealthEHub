@@ -1,0 +1,14 @@
+﻿.footerStyle {
+    background-color: var(--primary);
+    color: var(--text-100);
+}
+
+.bi {
+    color: var(--text-100);
+    font-size: 150%;
+    padding-inline-start: 0.5rem;
+}
+
+    .bi:hover {
+        color: var(--accent);
+    }
