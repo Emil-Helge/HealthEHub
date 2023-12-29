@@ -1,3 +1,5 @@
+using SharedModels;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -11,7 +13,14 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("ExerciseClient", client =>
+{
+    client.BaseAddress = new Uri("https://exercisedb.p.rapidapi.com/");
+    client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "exercisedb.p.rapidapi.com");
+    var apiKey = builder.Configuration["ExerciseDBAPIKey"];
+    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -28,16 +37,44 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
-app.MapGet("/exercisedata", async (IHttpClientFactory clientFactory, IConfiguration config) =>
+app.MapGet("/exercises", async (IHttpClientFactory clientFactory) =>
 {
-    var client = clientFactory.CreateClient();
-    var apiKey = config["ExerciseDBAPIKey"];
-    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
-    client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "exercisedb.p.rapidapi.com");
-    var response = await client.GetAsync("https://exercisedb.p.rapidapi.com/exercises");
-    return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<object>() : Results.Problem("API call failed.");
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
+        : Results.Problem("API call failed.");
 })
-.WithName("GetExerciseData")
-.WithOpenApi();
+.WithName("GetExercises");
+
+app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises/bodyPartList");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+        : Results.Problem("API call failed.");
+})
+.WithName("GetBodyParts");
+
+app.MapGet("/allequipment", async (IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises/equipmentList");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+        : Results.Problem("API call failed.");
+})
+.WithName("GetAllEquipment");
+
+app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises/targetList");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+        : Results.Problem("API call failed.");
+})
+.WithName("GetTargetMuscles");
 
 app.Run();
