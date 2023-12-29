@@ -1,5 +1,5 @@
 ﻿@page "/"
-@using HealthEHub.Models
+@using SharedModels
 @inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
@@ -7,9 +7,9 @@
 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
 
     <button class="btn btn-primary" @onclick="FetchExerciseData">Fetch Exercise Data</button>
-    @if (Exercisedata != null)
+    @if (Exercises != null)
     {
-        @foreach (var exercise in Exercisedata)
+        @foreach (var exercise in Exercises)
         {
             <p class="body-part">@exercise.BodyPart</p>
             <p class="equipment">@exercise.Equipment</p>
@@ -32,16 +32,60 @@
                 }
             }
         }
-
+    }
+    <button class="btn btn-primary" @onclick="FetchBodyPartData">Fetch Body Part Data</button>
+    @if (BodyParts != null)
+    {
+        @foreach (var bodyPart in BodyParts)
+        {
+            <p>@bodyPart</p>
+        }
+    }
+    <button class="btn btn-primary" @onclick="FetchEquipmentData">Fetch Equipment Data</button>
+    @if (AllEquipment != null)
+    {
+        @foreach (var equipment in AllEquipment)
+        {
+            <p>@equipment</p>
+        }
+    }
+    <button class="btn btn-primary" @onclick="FetchTargetMuscleData">Fetch Target Muscle Data</button>
+    @if (TargetMuscles != null)
+    {
+        @foreach (var targetMuscle in TargetMuscles)
+        {
+            <p>@targetMuscle</p>
+        }
     }
 </div>
 
 @code {
 
-    private Exercise[]? Exercisedata;
+    private Exercise[]? Exercises;
 
     private async Task FetchExerciseData()
     {
-        Exercisedata = await Http.GetFromJsonAsync<Exercise[]>("https://localhost:7024/exercisedata");
+        Exercises = await Http.GetFromJsonAsync<Exercise[]>("https://localhost:7024/exercises");
+    }
+
+    private string[]? BodyParts;
+
+    private async Task FetchBodyPartData()
+    {
+        BodyParts = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/bodyparts");
+    }
+
+    private string[]? AllEquipment;
+
+    private async Task FetchEquipmentData()
+    {
+        AllEquipment = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/allequipment");
+    }
+
+    private string[]? TargetMuscles;
+
+    private async Task FetchTargetMuscleData()
+    {
+        TargetMuscles = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/targetmuscles");
     }
 }
