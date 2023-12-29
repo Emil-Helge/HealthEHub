@@ -40,7 +40,7 @@ app.UseHttpsRedirection();
 app.MapGet("/exercises", async (IHttpClientFactory clientFactory) =>
 {
     var client = clientFactory.CreateClient("ExerciseClient");
-    var response = await client.GetAsync("exercises");
+    var response = await client.GetAsync("exercises?limit=1300");
     return response.IsSuccessStatusCode
         ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
         : Results.Problem("API call failed.");
