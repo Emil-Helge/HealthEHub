@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthEHub", "HealthEHub.Client\HealthEHub.csproj", "{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthEHub.Client", "HealthEHub.Client\HealthEHub.Client.csproj", "{87BAFE93-C61D-4E4E-B27D-690CF9CB9E65}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthEHub.API", "HealthEHub.API\HealthEHub.API.csproj", "{8C81DEE2-5949-43E1-9300-03B4A43EF52E}"
 EndProject
