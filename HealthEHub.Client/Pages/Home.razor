@@ -1,15 +1,14 @@
 ﻿@page "/"
-@using HealthEHub.Models
+@using SharedModels
 @inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
 
 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
 
-    <button class="btn btn-primary" @onclick="FetchExerciseData">Fetch Exercise Data</button>
-    @if (Exercisedata != null)
+    @if (allExercises != null)
     {
-        @foreach (var exercise in Exercisedata)
+        @foreach (var exercise in allExercises)
         {
             <p class="body-part">@exercise.BodyPart</p>
             <p class="equipment">@exercise.Equipment</p>
@@ -32,16 +31,94 @@
                 }
             }
         }
+    }
+    @if (BodyParts != null)
+    {
+        @foreach (var bodyPart in BodyParts)
+        {
+            <p>@bodyPart</p>
+        }
+    }
+    @if (AllEquipment != null)
+    {
+        @foreach (var equipment in AllEquipment)
+        {
+            <p>@equipment</p>
+        }
+    }
+    @if (TargetMuscles != null)
+    {
+        @foreach (var targetMuscle in TargetMuscles)
+        {
+            <p>@targetMuscle</p>
+        }
+    }
+    <input type="text" @bind="searchTerm" placeholder="Search..." />
+    <button @onclick="HandleSearch">Search</button>
 
+    @if (searchedExercises != null)
+    {
+        @foreach (var exercise in searchedExercises)
+        {
+            <p class="body-part">@exercise.BodyPart</p>
+            <p class="equipment">@exercise.Equipment</p>
+            <img src="@exercise.GifUrl" alt="Exercise Gif" title="GIF of exercise: @exercise.Name" />
+            <p class="id">@exercise.Id</p>
+            <p class="name">@exercise.Name</p>
+            <p class="target">@exercise.Target</p>
+            @if (exercise.SecondaryMuscles != null)
+            {
+                foreach (var muscle in exercise.SecondaryMuscles)
+                {
+                    <p class="secondary-muscles">@muscle</p>
+                }
+            }
+            @if (exercise.Instructions != null)
+            {
+                foreach (var instruction in exercise.Instructions)
+                {
+                    <p class="instructions">@instruction</p>
+                }
+            }
+        }
     }
 </div>
 
 @code {
+    private string[]? BodyParts;
+    private string[]? AllEquipment;
+    private string[]? TargetMuscles;
+    private string searchTerm = "";
+    private List<Exercise>? allExercises;
+    private List<Exercise>? searchedExercises;
 
-    private Exercise[]? Exercisedata;
 
-    private async Task FetchExerciseData()
+
+    protected override async Task OnInitializedAsync()
     {
-        Exercisedata = await Http.GetFromJsonAsync<Exercise[]>("https://localhost:7024/exercisedata");
+        allExercises = await Http.GetFromJsonAsync<List<Exercise>>("https://localhost:7024/exercises");
+        TargetMuscles = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/targetmuscles");
+        AllEquipment = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/allequipment");
+        BodyParts = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/bodyparts");
     }
+
+    private void HandleSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchedExercises = allExercises?.Where(exercise =>
+                exercise.Name?.ToLower().Contains(searchTerm.ToLower()) == true ||
+                exercise.Target?.ToLower().Contains(searchTerm.ToLower()) == true ||
+                exercise.Equipment?.ToLower().Contains(searchTerm.ToLower()) == true ||
+                exercise.BodyPart?.ToLower().Contains(searchTerm.ToLower()) == true
+            ).ToList();
+        }
+        else
+        {
+            searchedExercises = allExercises;
+        }
+    }
+}
+}
+
 }

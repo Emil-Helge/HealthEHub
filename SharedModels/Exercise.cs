@@ -1,4 +1,4 @@
-﻿namespace HealthEHub.Models
+﻿namespace SharedModels
 {
     public class Exercise
     {
@@ -11,5 +11,4 @@
         public string[]? SecondaryMuscles { get; set; }
         public string[]? Instructions { get; set; }
     }
-
 }

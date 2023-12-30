@@ -1,3 +1,6 @@
+using SharedModels;
+using HealthEHub.API.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -11,9 +14,17 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("ExerciseClient", client =>
+{
+    client.BaseAddress = new Uri("https://exercisedb.p.rapidapi.com/");
+    client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "exercisedb.p.rapidapi.com");
+    var apiKey = builder.Configuration["ExerciseDBAPIKey"];
+    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IMockDataService, MockDataService>();
 
 var app = builder.Build();
 
@@ -28,16 +39,77 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
-app.MapGet("/exercisedata", async (IHttpClientFactory clientFactory, IConfiguration config) =>
+app.MapGet("/exercises", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
-    var client = clientFactory.CreateClient();
-    var apiKey = config["ExerciseDBAPIKey"];
-    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
-    client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "exercisedb.p.rapidapi.com");
-    var response = await client.GetAsync("https://exercisedb.p.rapidapi.com/exercises");
-    return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<object>() : Results.Problem("API call failed.");
+    if (app.Environment.IsDevelopment())
+    {
+        var mockExercises = mockDataService.GetExercises();
+        return Results.Ok(mockExercises);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises?limit=1300");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
+            : Results.Problem("API call failed.");
+    }
 })
-.WithName("GetExerciseData")
-.WithOpenApi();
+.WithName("GetExercises");
+
+app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+{
+    if (app.Environment.IsDevelopment())
+    {
+        var mockBodyParts = mockDataService.GetBodyParts();
+        return Results.Ok(mockBodyParts);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises/bodyPartList");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+            : Results.Problem("API call failed.");
+    }
+})
+.WithName("GetBodyParts");
+
+app.MapGet("/allequipment", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+{
+    if (app.Environment.IsDevelopment())
+    {
+        var mockEquipment = mockDataService.GetAllEquipment();
+        return Results.Ok(mockEquipment);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises/equipmentList");
+        return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+        : Results.Problem("API call failed.");
+
+    }
+})
+.WithName("GetAllEquipment");
+
+app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+{
+    if (app.Environment.IsDevelopment())
+    {
+        var mockTargetMuscles = mockDataService.GetTargetMuscles();
+        return Results.Ok(mockTargetMuscles);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises/targetList");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+            : Results.Problem("API call failed.");
+    }
+})
+.WithName("GetTargetMuscles");
 
 app.Run();
