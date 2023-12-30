@@ -1,4 +1,5 @@
 using SharedModels;
+using HealthEHub.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddHttpClient("ExerciseClient", client =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IMockDataService, MockDataService>();
 
 var app = builder.Build();
 
@@ -37,43 +39,76 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
-app.MapGet("/exercises", async (IHttpClientFactory clientFactory) =>
+app.MapGet("/exercises", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
-    var client = clientFactory.CreateClient("ExerciseClient");
-    var response = await client.GetAsync("exercises?limit=1300");
-    return response.IsSuccessStatusCode
-        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
-        : Results.Problem("API call failed.");
+    if (app.Environment.IsDevelopment())
+    {
+        var mockExercises = mockDataService.GetExercises();
+        return Results.Ok(mockExercises);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises?limit=1300");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
+            : Results.Problem("API call failed.");
+    }
 })
 .WithName("GetExercises");
 
-app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory) =>
+app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
-    var client = clientFactory.CreateClient("ExerciseClient");
-    var response = await client.GetAsync("exercises/bodyPartList");
-    return response.IsSuccessStatusCode
-        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
-        : Results.Problem("API call failed.");
+    if (app.Environment.IsDevelopment())
+    {
+        var mockBodyParts = mockDataService.GetBodyParts();
+        return Results.Ok(mockBodyParts);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises/bodyPartList");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+            : Results.Problem("API call failed.");
+    }
 })
 .WithName("GetBodyParts");
 
-app.MapGet("/allequipment", async (IHttpClientFactory clientFactory) =>
+app.MapGet("/allequipment", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
-    var client = clientFactory.CreateClient("ExerciseClient");
-    var response = await client.GetAsync("exercises/equipmentList");
-    return response.IsSuccessStatusCode
+    if (app.Environment.IsDevelopment())
+    {
+        var mockEquipment = mockDataService.GetAllEquipment();
+        return Results.Ok(mockEquipment);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises/equipmentList");
+        return response.IsSuccessStatusCode
         ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
         : Results.Problem("API call failed.");
+
+    }
 })
 .WithName("GetAllEquipment");
 
-app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory) =>
+app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
-    var client = clientFactory.CreateClient("ExerciseClient");
-    var response = await client.GetAsync("exercises/targetList");
-    return response.IsSuccessStatusCode
-        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
-        : Results.Problem("API call failed.");
+    if (app.Environment.IsDevelopment())
+    {
+        var mockTargetMuscles = mockDataService.GetTargetMuscles();
+        return Results.Ok(mockTargetMuscles);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync("exercises/targetList");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+            : Results.Problem("API call failed.");
+    }
 })
 .WithName("GetTargetMuscles");
 
