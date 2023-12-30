@@ -6,10 +6,9 @@
 
 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
 
-    <button class="btn btn-primary" @onclick="FetchExerciseData">Fetch Exercise Data</button>
-    @if (Exercises != null)
+    @if (allExercises != null)
     {
-        @foreach (var exercise in Exercises)
+        @foreach (var exercise in allExercises)
         {
             <p class="body-part">@exercise.BodyPart</p>
             <p class="equipment">@exercise.Equipment</p>
@@ -33,7 +32,6 @@
             }
         }
     }
-    <button class="btn btn-primary" @onclick="FetchBodyPartData">Fetch Body Part Data</button>
     @if (BodyParts != null)
     {
         @foreach (var bodyPart in BodyParts)
@@ -41,7 +39,6 @@
             <p>@bodyPart</p>
         }
     }
-    <button class="btn btn-primary" @onclick="FetchEquipmentData">Fetch Equipment Data</button>
     @if (AllEquipment != null)
     {
         @foreach (var equipment in AllEquipment)
@@ -49,7 +46,6 @@
             <p>@equipment</p>
         }
     }
-    <button class="btn btn-primary" @onclick="FetchTargetMuscleData">Fetch Target Muscle Data</button>
     @if (TargetMuscles != null)
     {
         @foreach (var targetMuscle in TargetMuscles)
@@ -89,42 +85,21 @@
 </div>
 
 @code {
-
-    private Exercise[]? Exercises;
-
-    private async Task FetchExerciseData()
-    {
-        Exercises = await Http.GetFromJsonAsync<Exercise[]>("https://localhost:7024/exercises");
-    }
-
     private string[]? BodyParts;
-
-    private async Task FetchBodyPartData()
-    {
-        BodyParts = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/bodyparts");
-    }
-
     private string[]? AllEquipment;
-
-    private async Task FetchEquipmentData()
-    {
-        AllEquipment = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/allequipment");
-    }
-
     private string[]? TargetMuscles;
-
-    private async Task FetchTargetMuscleData()
-    {
-        TargetMuscles = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/targetmuscles");
-    }
-
     private string searchTerm = "";
     private List<Exercise>? allExercises;
     private List<Exercise>? searchedExercises;
 
+
+
     protected override async Task OnInitializedAsync()
     {
         allExercises = await Http.GetFromJsonAsync<List<Exercise>>("https://localhost:7024/exercises");
+        TargetMuscles = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/targetmuscles");
+        AllEquipment = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/allequipment");
+        BodyParts = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/bodyparts");
     }
 
     private void HandleSearch()
