@@ -7,7 +7,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:7020", "https://healthehubapp.azurewebsites.net/")
+        policy.WithOrigins("https://localhost:7020", "https://healthehubapp.azurewebsites.net")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
