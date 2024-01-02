@@ -7,7 +7,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:7020")
+        policy.WithOrigins("https://localhost:7020", "https://purple-dune-0c108f803.4.azurestaticapps.net")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
