@@ -2,7 +2,7 @@ name: Build and deploy .NET Core application to Web App HealthEHubAppAPI
 on:
   push:
     branches:
-    - 10-deploy-setup
+    - main
 env:
   AZURE_WEBAPP_NAME: HealthEHubAppAPI
   AZURE_WEBAPP_PACKAGE_PATH: HealthEHub.API\publish
