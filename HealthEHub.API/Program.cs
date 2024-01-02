@@ -7,7 +7,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:7020")
+        policy.WithOrigins("https://localhost:7020", "https://healthehubapp.azurewebsites.net")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -29,11 +29,9 @@ builder.Services.AddSingleton<IMockDataService, MockDataService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("CorsPolicy");
 
