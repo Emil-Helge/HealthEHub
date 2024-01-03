@@ -1,0 +1,63 @@
+﻿.sliding-cards-container {
+    display: flex;
+    gap: 1.2rem;
+}
+
+.card {
+    width: 6rem;
+    height: 27rem;
+    border-radius: 1.3rem;
+    background-size: cover;
+    cursor: pointer;
+    transition: 0.7s cubic-bezier(0.54,-0.03,0,.99);
+    box-shadow: 0 0.8rem 2rem -0.2rem var(--primary);
+}
+
+
+
+
+input:checked + label {
+    width: 32rem;
+}
+
+.card[for="c1"] {
+    background-image: url('images/goblet-squat.png');
+}
+
+.card[for="c2"] {
+    background-image: url('images/push-up.png');
+}
+
+.card[for="c3"] {
+    background-image: url('images/stretching.png');
+}
+
+@media (max-width: 767px) {
+    .sliding-cards-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        height: 4rem;
+        width: 100%;
+        transition: height 0.7s cubic-bezier(0.54,-0.03,0,.99);
+    }
+
+    input:checked + label {
+        height: 25rem;
+        width: 20rem;
+    }
+
+    .card[for="c1"] {
+        background-image: url('images/goblet-squat-cropped.png');
+    }
+
+    .card[for="c2"] {
+        background-image: url('images/push-up-cropped.png');
+    }
+
+    .card[for="c3"] {
+        background-image: url('images/stretching-cropped.png');
+    }
+}
