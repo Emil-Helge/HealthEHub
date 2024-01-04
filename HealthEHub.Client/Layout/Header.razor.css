@@ -1,3 +1,7 @@
-﻿.navbar {
+﻿.container-xxl {
+    background: var(--background);
+}
+
+.navbar {
     height: 56px;
 }
