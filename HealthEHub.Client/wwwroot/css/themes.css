@@ -147,23 +147,12 @@
     --bs-btn-bg: transparent;
     --bs-btn-border-color: var(--primary);
     --bs-btn-hover-color: var(--accent-500);
-    --bs-btn-hover-bg: transparent;
     --bs-btn-hover-border-color: var(--accent-500);
     --bs-btn-active-color: var(--accent-600);
-    --bs-btn-active-bg: transparent;
     --bs-btn-active-border-color: var(--accent-600);
 }
 
-    .btn-outline:focus {
-        border-color: var(--accent-600);
-    }
-
 input[type="search"]:focus {
     box-shadow: none;
-    border-color: var(--accent-600);
-}
-
-.navbar-toggler:focus {
-    border-color: var(--accent-200);
-    box-shadow: none;
+    border-color: var(--accent-500);
 }
