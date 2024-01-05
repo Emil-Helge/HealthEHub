@@ -156,3 +156,15 @@ input[type="search"]:focus {
     box-shadow: none;
     border-color: var(--accent-500);
 }
+
+.nav-link {
+    color: var(--primary);
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--accent-500);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--accent-600);
+}
