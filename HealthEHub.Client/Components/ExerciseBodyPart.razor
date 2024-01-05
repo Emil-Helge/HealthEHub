@@ -1,0 +1,46 @@
+﻿@if (BodyParts is not null)
+{
+    <div class="row">
+        @foreach (var bodyPart in BodyParts)
+        {
+            <div class="col">
+                <div class="d-flex flex-column justify-content-center align-items-center text-center">
+                    <span class="body-part-title text-uppercase">@bodyPart</span>
+                    <img src="@GetImagePath(bodyPart)" alt="@bodyPart" height="64" />
+                </div>
+            </div>
+        }
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public string[] BodyParts { get; set; } = Array.Empty<string>();
+
+
+    private Dictionary<string, string> bodyPartImageMap = new()
+        {
+            ["back"] = "muscle-back.svg",
+            ["upper arms"] = "muscle-arms.svg",
+            ["lower arms"] = "muscle-arms.svg",
+            ["cardio"] = "muscle-cardio.svg",
+            ["chest"] = "muscle-front-upper-body.svg",
+            ["neck"] = "muscle-front-upper-body.svg",
+            ["shoulders"] = "muscle-front-upper-body.svg",
+            ["waist"] = "muscle-front-upper-body.svg",
+            ["lower legs"] = "muscle-legs.svg",
+            ["upper legs"] = "muscle-legs.svg"
+        };
+
+    private string GetImagePath(string bodyPart)
+    {
+        var normalizedBodyPart = bodyPart.ToLower();
+        if (bodyPartImageMap.TryGetValue(normalizedBodyPart, out var imagePath))
+        {
+            return $"images/{imagePath}";
+        }
+
+        return "images/icons/default.svg";
+    }
+}
