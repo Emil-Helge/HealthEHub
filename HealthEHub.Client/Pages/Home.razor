@@ -7,13 +7,7 @@
 <div class="h-100 d-flex flex-column justify-content-center align-items-center">
 
     <SlidingCards />
-    @if (BodyParts != null)
-    {
-        @foreach (var bodyPart in BodyParts)
-        {
-            <p>@bodyPart</p>
-        }
-    }
+
     @if (AllEquipment != null)
     {
         @foreach (var equipment in AllEquipment)
@@ -60,7 +54,6 @@
 </div>
 
 @code {
-    private string[]? BodyParts;
     private string[]? AllEquipment;
     private string[]? TargetMuscles;
     private string searchTerm = "";
@@ -79,7 +72,7 @@
         allExercises = await Http.GetFromJsonAsync<List<Exercise>>("https://localhost:7024/exercises");
         TargetMuscles = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/targetmuscles");
         AllEquipment = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/allequipment");
-        BodyParts = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/bodyparts");
+
     }
 
     private void HandleSearch()
