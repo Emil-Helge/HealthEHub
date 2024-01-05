@@ -1,0 +1,24 @@
+﻿@page "/exercises"
+@using SharedModels
+@inject HttpClient Http
+
+<PageTitle>Exercises</PageTitle>
+
+
+@code {
+    private string[]? BodyParts;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Commented out for local testing
+        // allExercises = await Http.GetFromJsonAsync<List<Exercise>>("https://healthehubappapi.azurewebsites.net/exercises");
+        // TargetMuscles = await Http.GetFromJsonAsync<string[]>("https://healthehubappapi.azurewebsites.net/targetmuscles");
+        // AllEquipment = await Http.GetFromJsonAsync<string[]>("https://healthehubappapi.azurewebsites.net/allequipment");
+        // BodyParts = await Http.GetFromJsonAsync<string[]>("https://healthehubappapi.azurewebsites.net/bodyparts");
+        // allExercises = await Http.GetFromJsonAsync<List<Exercise>>("https:localhost:7024/exercises");
+        // TargetMuscles = await Http.GetFromJsonAsync<string[]>("https:localhost:7024/targetmuscles");
+        // AllEquipment = await Http.GetFromJsonAsync<string[]>("https:localhost:7024/allequipment");
+        BodyParts = await Http.GetFromJsonAsync<string[]>("https://localhost:7024/bodyparts");
+    }
+}
