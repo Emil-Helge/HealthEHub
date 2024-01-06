@@ -37,6 +37,24 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
+app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+{
+    if (app.Environment.IsDevelopment())
+    {
+        var mockExercises = mockDataService.GetExercises().FirstOrDefault(e => e.Id == id);
+        return Results.Ok(mockExercises);
+    }
+    else
+    {
+        var client = clientFactory.CreateClient("ExerciseClient");
+        var response = await client.GetAsync($"/exercises/exercise/{id}");
+        return response.IsSuccessStatusCode
+            ? Results.Ok(await response.Content.ReadFromJsonAsync<Exercise>())
+            : Results.Problem("API call failed.");
+    }
+})
+.WithName("GetExerciseById");
+
 app.MapGet("/exercises", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
     if (app.Environment.IsDevelopment())
