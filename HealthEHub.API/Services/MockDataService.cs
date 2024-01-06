@@ -302,5 +302,11 @@ namespace HealthEHub.API.Services
                 },
             };
         }
+        public Exercise GetExerciseById(int id)
+        {
+            var exercises = GetExercises();
+            var exercise = exercises.FirstOrDefault(e => e.Id == id.ToString()) ?? throw new InvalidOperationException("Exercise not found.");
+            return exercise;
+        }
     }
 }
