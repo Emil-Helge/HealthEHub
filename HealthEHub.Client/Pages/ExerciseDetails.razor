@@ -1,0 +1,27 @@
+﻿@page "/exercise/{id}"
+@inject HttpClient Http
+
+<PageTitle>Details for @exercise?.Name</PageTitle>
+
+    <h3>ExerciseDetails</h3>
+    @if (exercise is not null)
+{
+    <p>@exercise.Name</p>
+    <p>The ID of this exercise is @Id</p>
+}
+else
+{
+    <p>Loading exercise details...</p>
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private Exercise? exercise;
+
+    protected override async Task OnInitializedAsync()
+    {
+        exercise = await Http.GetFromJsonAsync<Exercise>($"exercise/{Id}");
+    }
+}
