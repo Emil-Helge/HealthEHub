@@ -1,13 +1,54 @@
 ﻿@page "/exercise/{id}"
 @inject HttpClient Http
 
-<PageTitle>Details for @exercise?.Name</PageTitle>
 
-    <h3>ExerciseDetails</h3>
-    @if (exercise is not null)
+@if (exercise is not null)
 {
-    <p>@exercise.Name</p>
-    <p>The ID of this exercise is @Id</p>
+    <PageTitle>Details for @exercise?.Name</PageTitle>
+    <div class="hero-bg">
+        <div class="hero-container">
+            <div class="container-xxl d-flex flex-column flex-md-row">
+                <div class="flex-grow-1 d-flex align-items-center justify-content-center justify-content-md-end">
+                    <div class="title-container text-center text-md-end">
+                        <h1>@exercise.Name</h1>
+                    </div>
+                </div>
+                <div class="order-last order-md-first d-flex justify-content-center">
+                    <div class="gif-container">
+                        <img src="@exercise.GifUrl" alt="@exercise.Name" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl">
+        <div class="details">
+            <div class="instructions">
+                <h4>Instructions</h4>
+                @if (exercise.Instructions is not null)
+                {
+                    foreach (var instruction in exercise.Instructions)
+                    {
+                        <p class="instruction">@instruction</p>
+                    }
+                }
+            </div>
+            <div class="overview">
+                <p>@exercise.BodyPart</p>
+                <p>@exercise.Equipment</p>
+                <p>@exercise.Target</p>
+            </div>
+            <div class="secondary-muscles">
+                @if (exercise.SecondaryMuscles != null)
+                {
+                    foreach (var muscle in exercise.SecondaryMuscles)
+                    {
+                        <p class="secondary-muscles">@muscle</p>
+                    }
+                }
+            </div>
+        </div>
+    </div>
 }
 else
 {
