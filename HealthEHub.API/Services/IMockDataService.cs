@@ -1,4 +1,4 @@
-﻿using SharedModels;
+﻿using SharedModels.Models;
 namespace HealthEHub.API.Services
 {
     public interface IMockDataService
