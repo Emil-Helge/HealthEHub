@@ -1,5 +1,5 @@
-using SharedModels;
 using HealthEHub.API.Services;
+using SharedModels.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +18,15 @@ builder.Services.AddHttpClient("ExerciseClient", client =>
 {
     client.BaseAddress = new Uri("https://exercisedb.p.rapidapi.com/");
     client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "exercisedb.p.rapidapi.com");
-    var apiKey = builder.Configuration["ExerciseDBAPIKey"];
+    var apiKey = builder.Configuration["RapidAPIKey"];
+    client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
+});
+
+builder.Services.AddHttpClient("YoutubeSearchClient", client =>
+{
+    client.BaseAddress = new Uri("https://youtube-search-and-download.p.rapidapi.com/");
+    client.DefaultRequestHeaders.Add("X-RapidAPI-Host", "youtube-search-and-download.p.rapidapi.com");
+    var apiKey = builder.Configuration["RapidAPIKey"];
     client.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
 });
 
@@ -127,5 +135,16 @@ app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory, IMockDataS
     }
 })
 .WithName("GetTargetMuscles");
+
+app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("YoutubeSearchClient");
+    var response = await client.GetAsync($"https://youtube-search-and-download.p.rapidapi.com/search?query={query}&sort=v");
+
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<YoutubeSearchResult>())
+        : Results.Problem("API call failed.");
+})
+.WithName("SearchYoutube");
 
 app.Run();
