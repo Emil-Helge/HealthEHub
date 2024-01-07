@@ -39,7 +39,7 @@
                 <p>@exercise.Target</p>
             </div>
             <div class="secondary-muscles">
-                @if (exercise.SecondaryMuscles != null)
+                @if (exercise.SecondaryMuscles is not null)
                 {
                     foreach (var muscle in exercise.SecondaryMuscles)
                     {
@@ -47,6 +47,22 @@
                     }
                 }
             </div>
+
+            @if (youtubeSearchResult?.Contents is not null)
+            {
+                @foreach (var content in youtubeSearchResult.Contents.Take(1))
+                {
+                    var video = content.Video;
+                    <h4>@video.ChannelName</h4>
+                    <div class="ratio ratio-16x9">
+                        <iframe class="embed-responsive-item rounded" src="https://www.youtube.com/embed/@video.VideoId" allowfullscreen alt="@video.Title"></iframe>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No videos found.</p>
+            }
         </div>
     </div>
 }
@@ -60,9 +76,14 @@ else
     public string? Id { get; set; }
 
     private Exercise? exercise;
+    private YoutubeSearchResult? youtubeSearchResult;
 
     protected override async Task OnInitializedAsync()
     {
         exercise = await Http.GetFromJsonAsync<Exercise>($"exercise/{Id}");
+        if (exercise != null)
+        {
+            youtubeSearchResult = await Http.GetFromJsonAsync<YoutubeSearchResult>($"youtube/search?query={exercise.Name}");
+        }
     }
 }
