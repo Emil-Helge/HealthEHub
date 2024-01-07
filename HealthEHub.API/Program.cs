@@ -139,7 +139,8 @@ app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory, IMockDataS
 app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFactory) =>
 {
     var client = clientFactory.CreateClient("YoutubeSearchClient");
-    var response = await client.GetAsync($"https://youtube-search-and-download.p.rapidapi.com/search?query={query}&sort=v");
+    string queryAppendExercise = $"{query} exercise";
+    var response = await client.GetAsync($"https://youtube-search-and-download.p.rapidapi.com/search?query={queryAppendExercise}&sort=r");
 
     return response.IsSuccessStatusCode
         ? Results.Ok(await response.Content.ReadFromJsonAsync<YoutubeSearchResult>())
