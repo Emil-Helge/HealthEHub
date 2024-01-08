@@ -158,13 +158,13 @@ input[type="search"]:focus {
 }
 
 .nav-link {
-    color: var(--primary);
+    color: var(--text);
 }
 
 .navbar-nav .nav-link:hover {
-    color: var(--accent-500);
+    transform: translateY(-2%);
 }
 
 .navbar-nav .nav-link.active {
-    color: var(--accent-600);
+    color: var(--accent);
 }
