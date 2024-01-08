@@ -33,7 +33,7 @@ p {
     margin: 0;
 }
 
-p, span, label, input, button, select, option, textarea, li {
+p, span, label, input, button, select, option, textarea, li, strong {
     color: var(--text);
 }
 
