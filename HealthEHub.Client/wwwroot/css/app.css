@@ -37,6 +37,10 @@ p, span, label, input, button, select, option, textarea, li, strong {
     color: var(--text);
 }
 
+i {
+    font-size: 1.5rem;
+}
+
 /* #region Boilerplate default styles */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
