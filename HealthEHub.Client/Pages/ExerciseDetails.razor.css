@@ -46,8 +46,11 @@
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     background: var(--background-700);
-    color: var(--text-100);
 }
+
+    .overview * {
+        color: var(--text-100);
+    }
 
 .details {
     margin-top: 4rem;
