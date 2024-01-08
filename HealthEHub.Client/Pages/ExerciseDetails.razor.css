@@ -4,7 +4,6 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-radius: 0 0 2.6rem 0;
 }
 
 .hero-container {
@@ -12,16 +11,20 @@
     width: 100%;
     height: 100%;
     position: relative;
-    backdrop-filter: blur(0.02rem) brightness(76%);
+    backdrop-filter: blur(0.08rem) brightness(90%);
     margin-bottom: 2rem;
-    border-radius: 0 0 2.6rem 0;
+}
+
+.title-container h1 {
+    color: var(--text);
+    text-shadow: 0 0 1px var(--text-950);
 }
 
 .gif-container {
     aspect-ratio: 1/1;
     position: relative;
-    transform: translateY(33%);
-    box-shadow: 0 0.2rem 0.4rem -0.2rem var(--primary);
+    transform: translateY(8%);
+    box-shadow: 0 0.2rem 0.2rem -0.2rem var(--primary);
     border-radius: 1.3rem;
 }
 
@@ -32,14 +35,27 @@
         border-radius: 1.3rem;
     }
 
+.instructions {
+    flex-grow: 1;
+}
+
+.overview {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--background-700);
+    color: var(--text-100);
+}
+
 .details {
-    margin-top: 9rem;
+    margin-top: 4rem;
 }
 
 
 @media (min-width: 992px) {
     .details {
-        margin-left: 23.5rem;
-        margin-top: 0.5rem;
+        margin-top: 5rem;
     }
 }
