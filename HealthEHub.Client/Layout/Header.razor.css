@@ -1,5 +1,6 @@
 ﻿.container-xxl {
     background: var(--background);
+    z-index: 1;
 }
 
 .navbar {

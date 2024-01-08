@@ -1,4 +1,4 @@
-﻿using SharedModels;
+﻿using SharedModels.Models;
 namespace HealthEHub.API.Services
 {
     public interface IMockDataService
@@ -7,5 +7,6 @@ namespace HealthEHub.API.Services
         IEnumerable<string> GetAllEquipment();
         IEnumerable<string> GetTargetMuscles();
         IEnumerable<Exercise> GetExercises();
+        Exercise GetExerciseById(int id);
     }
 }

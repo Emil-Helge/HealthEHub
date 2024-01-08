@@ -1,4 +1,4 @@
-﻿using SharedModels;
+﻿using SharedModels.Models;
 
 namespace HealthEHub.API.Services
 {
@@ -87,7 +87,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "waist",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/FNFaI8kmnQ-1BO",
                     Id =  "0001",
                     Name = "3/4 sit-up",
                     Target = "abs",
@@ -109,7 +109,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "waist",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/G0CSVtDq67Y2Zq",
                     Id =  "0002",
                     Name = "45° side bend",
                     Target = "abs",
@@ -130,7 +130,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "waist",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/PHX2GFTslQzKiX",
                     Id =  "0003",
                     Name = "air bike",
                     Target = "abs",
@@ -151,7 +151,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "upper legs",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/7Sk8bfK9dWeEAi",
                     Id =  "1512",
                     Name = "all fours squad stretch",
                     Target = "quads",
@@ -173,7 +173,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "waist",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/TbmLyfYuVL9j1m",
                     Id =  "0006",
                     Name = "alternate heel touchers",
                     Target = "abs",
@@ -194,7 +194,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "back",
                     Equipment = "cable",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/sismJhlZOgUuWL",
                     Id =  "0007",
                     Name = "alternate lateral pulldown",
                     Target = "lats",
@@ -216,7 +216,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "lower legs",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/d3x1Kgc-H4Blg0",
                     Id =  "1368",
                     Name = "ankle circles",
                     Target = "calves",
@@ -236,7 +236,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "back",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/M4LIybSgfv-YEt",
                     Id =  "3293",
                     Name = "archer pull up",
                     Target = "lats",
@@ -259,7 +259,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "chest",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/c-IYLVp13j8F9o",
                     Id =  "3294",
                     Name = "archer push up",
                     Target = "pectorals",
@@ -283,7 +283,7 @@ namespace HealthEHub.API.Services
                 {
                     BodyPart = "waist",
                     Equipment = "body weight",
-                    GifUrl = "https://cdn.pixabay.com/photo/2023/06/17/16/22/man-8070375_1280.jpg",
+                    GifUrl = "https://v2.exercisedb.io/image/zAZFUsnoIgcuk4",
                     Id =  "2355",
                     Name = "arm slingers hanging bent knee legs",
                     Target = "abs",
@@ -301,6 +301,12 @@ namespace HealthEHub.API.Services
                     ]
                 },
             };
+        }
+        public Exercise GetExerciseById(int id)
+        {
+            var exercises = GetExercises();
+            var exercise = exercises.FirstOrDefault(e => e.Id == id.ToString()) ?? throw new InvalidOperationException("Exercise not found.");
+            return exercise;
         }
     }
 }

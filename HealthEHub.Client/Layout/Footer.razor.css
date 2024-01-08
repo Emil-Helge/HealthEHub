@@ -1,5 +1,5 @@
 ﻿.footerStyle {
-    background-color: var(--primary);
+    background: var(--background-700);
     color: var(--text-100);
 }
 
