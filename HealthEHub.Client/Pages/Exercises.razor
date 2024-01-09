@@ -5,17 +5,17 @@
 
 <div class="container-xxl py-3">
     <ExerciseBodyPart BodyParts="@BodyParts" />
-    <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+    <form class="d-flex" @onsubmit="HandleSearch">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" @bind="searchTerm">
         <button class="btn btn-outline" type="submit">
             <i class="bi bi-search"></i>
         </button>
     </form>
     <div class="d-flex flex-column justify-content-between my-3">
         <div class="row row-cols-2 row-cols-lg-4 row-cols-xl-5 g-3 justify-content-center justify-content-md-start">
-            @if (allExercises is not null)
+            @if (searchedExercises is not null && searchedExercises.Count > 0)
             {
-                @foreach (Exercise exercise in allExercises)
+                @foreach (Exercise exercise in searchedExercises)
                 {
                     <div class="col">
                         <ExerciseCard Exercise="exercise" />
@@ -24,7 +24,7 @@
             }
             else
             {
-                for (int i = 0; i < 12; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     <div class="col">
                         <ExerciseCard />
@@ -39,11 +39,33 @@
 
 @code {
     private string[]? BodyParts;
+    private string searchTerm = "";
     private List<Exercise>? allExercises;
+    private List<Exercise>? searchedExercises;
 
     protected override async Task OnInitializedAsync()
     {
         allExercises = await Http.GetFromJsonAsync<List<Exercise>>("/exercises");
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
+        searchedExercises = allExercises?.Take(10).ToList();
+
+    }
+
+    private void HandleSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchedExercises = allExercises?.Where(exercise =>
+                exercise.Name?.ToLower().Contains(searchTerm.ToLower()) == true ||
+                exercise.Target?.ToLower().Contains(searchTerm.ToLower()) == true ||
+                exercise.Equipment?.ToLower().Contains(searchTerm.ToLower()) == true ||
+                exercise.BodyPart?.ToLower().Contains(searchTerm.ToLower()) == true
+            ).ToList();
+        }
+        else
+        {
+            // Show only the first 10 exercises when there's no search term
+            searchedExercises = allExercises?.Take(10).ToList();
+        }
     }
 }
