@@ -6,7 +6,7 @@ namespace HealthEHub.API.Services
         IEnumerable<string> GetBodyParts();
         IEnumerable<string> GetAllEquipment();
         IEnumerable<string> GetTargetMuscles();
-        IEnumerable<Exercise> GetExercises();
-        Exercise GetExerciseById(int id);
+        IEnumerable<Exercise> GetExercises(int offset, int limit);
+        Exercise GetExerciseById(string id);
     }
 }
