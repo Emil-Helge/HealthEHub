@@ -49,8 +49,8 @@ app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory,
 {
     if (app.Environment.IsDevelopment())
     {
-        var mockExercises = mockDataService.GetExercises().FirstOrDefault(e => e.Id == id);
-        return Results.Ok(mockExercises);
+        var mockExercise = mockDataService.GetExerciseById(id);
+        return Results.Ok(mockExercise);
     }
     else
     {
@@ -63,17 +63,24 @@ app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory,
 })
 .WithName("GetExerciseById");
 
-app.MapGet("/exercises", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+app.MapGet("/exercises", async (int offset, int limit, IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
+    int MaxPages = 65;
+    int pageNumber = offset / limit + 1;
+
+    if (pageNumber > MaxPages)
+    {
+        return Results.Problem("Page number is too high.");
+    }
     if (app.Environment.IsDevelopment())
     {
-        var mockExercises = mockDataService.GetExercises();
+        var mockExercises = mockDataService.GetExercises(offset, limit);
         return Results.Ok(mockExercises);
     }
     else
     {
         var client = clientFactory.CreateClient("ExerciseClient");
-        var response = await client.GetAsync("exercises?limit=1300");
+        var response = await client.GetAsync($"exercises?offset={offset}&limit={limit}");
         return response.IsSuccessStatusCode
             ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
             : Results.Problem("API call failed.");
