@@ -11,6 +11,10 @@
             <i class="bi bi-search"></i>
         </button>
     </form>
+
+    <button class="btn btn-primary" @onclick="GoToPreviousPage" disabled="@(currentPage <= 1)">Previous</button>
+    <button class="btn btn-primary" @onclick="GoToNextPage" disabled="@(currentPage >= MaxPages)">Next</button>
+
     <div class="d-flex flex-column justify-content-between my-3">
         <div class="row row-cols-2 row-cols-lg-4 row-cols-xl-5 g-3 justify-content-center justify-content-md-start">
             @if (searchedExercises is not null && searchedExercises.Count > 0)
@@ -38,6 +42,9 @@
 
 
 @code {
+    private int countPerPage = 20;
+    private int currentPage = 1;
+    private const int MaxPages = 65;
     private string[]? BodyParts;
     private string searchTerm = "";
     private List<Exercise>? allExercises;
@@ -45,10 +52,36 @@
 
     protected override async Task OnInitializedAsync()
     {
-        allExercises = await Http.GetFromJsonAsync<List<Exercise>>("/exercises");
+        await LoadExercises(0, countPerPage);
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
-        searchedExercises = allExercises?.Take(10).ToList();
+    }
 
+    private async Task LoadExercises(int offset, int limit)
+    {
+        var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises?offset={offset}&limit={limit}");
+        if (response is not null)
+        {
+            allExercises = response;
+            searchedExercises = allExercises?.Take(limit).ToList();
+        }
+    }
+
+    private async Task GoToNextPage()
+    {
+        if (currentPage >= MaxPages) return;
+
+        currentPage++;
+        int offset = (currentPage - 1) * countPerPage;
+        await LoadExercises(offset, countPerPage);
+    }
+
+    private async Task GoToPreviousPage()
+    {
+        if (currentPage <= 1) return;
+
+        currentPage--;
+        int offset = (currentPage - 1) * countPerPage;
+        await LoadExercises(offset, countPerPage);
     }
 
     private void HandleSearch()
@@ -64,7 +97,6 @@
         }
         else
         {
-            // Show only the first 10 exercises when there's no search term
             searchedExercises = allExercises?.Take(10).ToList();
         }
     }
