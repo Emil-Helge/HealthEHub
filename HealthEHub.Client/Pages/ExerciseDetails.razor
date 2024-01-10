@@ -91,7 +91,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         exercise = await Http.GetFromJsonAsync<Exercise>($"exercise/{Id}");
-        if (exercise != null)
+        if (exercise is not null)
         {
             youtubeSearchResult = await Http.GetFromJsonAsync<YoutubeSearchResult>($"youtube/search?query={exercise.Name}");
         }

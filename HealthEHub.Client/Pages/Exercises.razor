@@ -4,7 +4,7 @@
 <PageTitle>Exercises</PageTitle>
 
 <div class="container-xxl py-3">
-    <ExerciseBodyPart BodyParts="@BodyParts" />
+    <ExerciseBodyPart BodyParts="@BodyParts" OnBodyPartSelected="SetSelectedBodyPart" />
     <form class="d-flex" @onsubmit="HandleSearch">
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" @bind="searchTerm">
         <button class="btn btn-outline" type="submit">
@@ -12,14 +12,14 @@
         </button>
     </form>
 
-    <button class="btn btn-primary" @onclick="GoToPreviousPage" disabled="@(currentPage <= 1)">Previous</button>
-    <button class="btn btn-primary" @onclick="GoToNextPage" disabled="@(currentPage >= MaxPages)">Next</button>
-
+    <button class="btn btn-primary" @onclick="LoadMoreExercises">Load More</button>
+    <p>Selected Body Part: @selectedBodyPart</p>
+    <button class="btn btn-secondary" @onclick="ClearBodyPartFilter">Clear Body Part Filter</button>
     <div class="d-flex flex-column justify-content-between my-3">
         <div class="row row-cols-2 row-cols-lg-4 row-cols-xl-5 g-3 justify-content-center justify-content-md-start">
-            @if (searchedExercises is not null && searchedExercises.Count > 0)
+            @if (displayedExercises is not null && displayedExercises.Count > 0)
             {
-                @foreach (Exercise exercise in searchedExercises)
+                @foreach (Exercise exercise in displayedExercises)
                 {
                     <div class="col">
                         <ExerciseCard Exercise="exercise" />
@@ -28,7 +28,7 @@
             }
             else
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < countPerPage; i++)
                 {
                     <div class="col">
                         <ExerciseCard />
@@ -39,56 +39,52 @@
     </div>
 </div>
 
-
-
 @code {
     private int countPerPage = 20;
-    private int currentPage = 1;
-    private const int MaxPages = 65;
+    private int offset = 0;
+    private int TotalExercises = 1300;
     private string[]? BodyParts;
+    private string selectedBodyPart = "";
     private string searchTerm = "";
     private List<Exercise>? allExercises;
-    private List<Exercise>? searchedExercises;
+    private List<Exercise>? displayedExercises;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadExercises(0, countPerPage);
+        await LoadExercises(offset, countPerPage);
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
     }
 
-    private async Task LoadExercises(int offset, int limit)
+    private async Task LoadExercises(int newOffset, int limit, string bodyPartFilter = "")
     {
-        var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises?offset={offset}&limit={limit}");
+        var requestUri = string.IsNullOrEmpty(bodyPartFilter)
+            ? $"exercises?limit={limit}&offset={newOffset}"
+            : $"exercises/bodyPart/{bodyPartFilter}?limit={limit}&offset={newOffset}";
+
+
+
+        var response = await Http.GetFromJsonAsync<List<Exercise>>(requestUri);
         if (response is not null)
         {
-            allExercises = response;
-            searchedExercises = allExercises?.Take(limit).ToList();
+            if (displayedExercises == null)
+            {
+                displayedExercises = new List<Exercise>();
+            }
+            displayedExercises.AddRange(response);
+            offset += response.Count;
         }
     }
 
-    private async Task GoToNextPage()
+    private async Task LoadMoreExercises()
     {
-        if (currentPage >= MaxPages) return;
-
-        currentPage++;
-        int offset = (currentPage - 1) * countPerPage;
-        await LoadExercises(offset, countPerPage);
-    }
-
-    private async Task GoToPreviousPage()
-    {
-        if (currentPage <= 1) return;
-
-        currentPage--;
-        int offset = (currentPage - 1) * countPerPage;
-        await LoadExercises(offset, countPerPage);
+        await LoadExercises(offset, countPerPage, selectedBodyPart);
     }
 
     private void HandleSearch()
     {
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            searchedExercises = allExercises?.Where(exercise =>
+            displayedExercises = allExercises?.Where(exercise =>
                 exercise.Name?.ToLower().Contains(searchTerm.ToLower()) == true ||
                 exercise.Target?.ToLower().Contains(searchTerm.ToLower()) == true ||
                 exercise.Equipment?.ToLower().Contains(searchTerm.ToLower()) == true ||
@@ -97,7 +93,43 @@
         }
         else
         {
-            searchedExercises = allExercises?.Take(10).ToList();
+            displayedExercises = allExercises;
         }
     }
+
+    private async Task SetSelectedBodyPart(string bodyPart)
+    {
+        selectedBodyPart = bodyPart;
+        offset = 0;
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+        }
+        await LoadMoreExercises();
+    }
+
+    private async Task ClearBodyPartFilter()
+    {
+        selectedBodyPart = "";
+        offset = 0;
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+        }
+        await LoadExercises(offset, countPerPage);
+    }
+
+    private void FilterExercisesByBodyPart(string bodyPart)
+    {
+        if (allExercises is not null && !string.IsNullOrWhiteSpace(bodyPart))
+        {
+            displayedExercises = allExercises.Where(exercise =>
+                exercise.BodyPart.Equals(bodyPart, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        else
+        {
+            displayedExercises = allExercises;
+        }
+    }
+
 }
