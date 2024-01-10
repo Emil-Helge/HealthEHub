@@ -144,7 +144,7 @@
         if (isSearching)
         {
             var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises/name/{searchTerm}?offset={offset}&limit={countPerPage}");
-            if (response != null)
+            if (response is not null)
             {
                 displayedExercises.AddRange(response);
                 offset += response.Count;
@@ -164,7 +164,7 @@
         if (isSearching)
         {
             var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises/name/{searchTerm}?offset=0&limit={countPerPage}");
-            if (response != null)
+            if (response is not null)
             {
                 displayedExercises = response;
             }
