@@ -115,6 +115,14 @@ namespace HealthEHub.API.Services
             return _mockExercises.Skip(offset).Take(limit);
         }
 
+        public IEnumerable<Exercise> GetExercisesByBodyPart(string bodyPart, int offset, int limit)
+        {
+            return _mockExercises
+                .Where(exercise => exercise.BodyPart.Equals(bodyPart, StringComparison.OrdinalIgnoreCase))
+                .Skip(offset)
+                .Take(limit);
+        }
+
         public Exercise GetExerciseById(string id)
         {
             var exercise = _mockExercises.FirstOrDefault(e => e.Id == id);
