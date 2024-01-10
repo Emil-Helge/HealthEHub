@@ -1,0 +1,23 @@
+﻿@if (AllEquipment != null)
+{
+    <h1>Equipment:</h1>
+    <div class="d-flex gap-2 flex-wrap">
+        @foreach (var equipment in AllEquipment)
+        {
+            <button class="btn btn-outline-primary" @onclick="() => SelectEquipment(equipment)">@equipment</button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string[] AllEquipment { get; set; } = Array.Empty<string>();
+
+    [Parameter]
+    public EventCallback<string> OnEquipmentSelected { get; set; }
+
+    private async Task SelectEquipment(string equipment)
+    {
+        await OnEquipmentSelected.InvokeAsync(equipment);
+    }
+}
