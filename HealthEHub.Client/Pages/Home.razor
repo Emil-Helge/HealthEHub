@@ -7,36 +7,8 @@
 
     <SlidingCards />
 
-    @if (AllEquipment != null)
-    {
-        @foreach (var equipment in AllEquipment)
-        {
-            <p>@equipment</p>
-        }
-    }
-    @if (TargetMuscles != null)
-    {
-        @foreach (var targetMuscle in TargetMuscles)
-        {
-            <p>@targetMuscle</p>
-        }
-    }
-
-
 </div>
 
 @code {
-    private string[]? AllEquipment;
-    private string[]? TargetMuscles;
-    private List<Exercise>? allExercises;
-
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
-        AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
-
-    }
 
 }
