@@ -97,6 +97,57 @@ app.MapGet("/exercises/bodyPart/{bodyPart}", async (string bodyPart, int limit, 
     }
 }).WithName("GetExercisesByBodyPart");
 
+app.MapGet("/exercises/equipment/{type}", async (string type, int limit, int offset, IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    string requestUri = $"exercises/equipment/{type}?limit={limit}&offset={offset}";
+
+    var response = await client.GetAsync(requestUri);
+    if (response.IsSuccessStatusCode)
+    {
+        var exercises = await response.Content.ReadFromJsonAsync<List<Exercise>>();
+        return Results.Ok(exercises);
+    }
+    else
+    {
+        return Results.Problem("API call to external service failed.");
+    }
+}).WithName("GetExercisesByEquipment");
+
+app.MapGet("/exercises/target/{target}", async (string target, int limit, int offset, IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    string requestUri = $"exercises/target/{target}?limit={limit}&offset={offset}";
+
+    var response = await client.GetAsync(requestUri);
+    if (response.IsSuccessStatusCode)
+    {
+        var exercises = await response.Content.ReadFromJsonAsync<List<Exercise>>();
+        return Results.Ok(exercises);
+    }
+    else
+    {
+        return Results.Problem("API call to external service failed.");
+    }
+}).WithName("GetExercisesByTarget");
+
+app.MapGet("/exercises/name/{name}", async (string name, int limit, int offset, IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    string requestUri = $"exercises/name/{name}?limit={limit}&offset={offset}";
+
+    var response = await client.GetAsync(requestUri);
+    if (response.IsSuccessStatusCode)
+    {
+        var exercises = await response.Content.ReadFromJsonAsync<List<Exercise>>();
+        return Results.Ok(exercises);
+    }
+    else
+    {
+        return Results.Problem("API call to external service failed.");
+    }
+}).WithName("GetExercisesByName");
+
 app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
     if (app.Environment.IsDevelopment())
