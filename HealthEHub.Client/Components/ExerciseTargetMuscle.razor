@@ -1,0 +1,23 @@
+﻿@if (TargetMuscles is not null)
+{
+    <h1>Target Muscle:</h1>
+    <div class="d-flex gap-2 flex-wrap">
+        @foreach (var targetMuscle in TargetMuscles)
+        {
+            <button class="btn btn-outline-primary" @onclick="() => SelectTargetMuscle(targetMuscle)">@targetMuscle</button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string[] TargetMuscles { get; set; } = Array.Empty<string>();
+
+    [Parameter]
+    public EventCallback<string> OnTargetMuscleSelected { get; set; }
+
+    private async Task SelectTargetMuscle(string targetMuscle)
+    {
+        await OnTargetMuscleSelected.InvokeAsync(targetMuscle);
+    }
+}

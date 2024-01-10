@@ -4,18 +4,26 @@
 <PageTitle>Exercises</PageTitle>
 
 <div class="container-xxl py-3">
-    <ExerciseBodyPart BodyParts="@BodyParts" />
-    <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+
+
+    <ExerciseTargetMuscle TargetMuscles="@TargetMuscles" OnTargetMuscleSelected="SetSelectedTargetMuscle" />
+    <ExerciseEquipment AllEquipment="@AllEquipment" OnEquipmentSelected="SetSelectedEquipment" />
+    <ExerciseBodyPart BodyParts="@BodyParts" OnBodyPartSelected="SetSelectedBodyPart" />
+    <form class="d-flex" @onsubmit="HandleFormSubmit">
+        <input class="form-control me-2" type="search" placeholder="Search by exercise name" aria-label="Search" @bind="searchTerm">
         <button class="btn btn-outline" type="submit">
             <i class="bi bi-search"></i>
         </button>
     </form>
+
+
+    <p>Selected Body Part: @selectedBodyPart</p>
+    <button class="btn btn-secondary" @onclick="ClearFilter">Clear</button>
     <div class="d-flex flex-column justify-content-between my-3">
         <div class="row row-cols-2 row-cols-lg-4 row-cols-xl-5 g-3 justify-content-center justify-content-md-start">
-            @if (allExercises is not null)
+            @if (displayedExercises is not null && displayedExercises.Count > 0)
             {
-                @foreach (Exercise exercise in allExercises)
+                @foreach (Exercise exercise in displayedExercises)
                 {
                     <div class="col">
                         <ExerciseCard Exercise="exercise" />
@@ -24,7 +32,7 @@
             }
             else
             {
-                for (int i = 0; i < 12; i++)
+                for (int i = 0; i < countPerPage; i++)
                 {
                     <div class="col">
                         <ExerciseCard />
@@ -32,18 +40,176 @@
                 }
             }
         </div>
+        <button class="btn btn-primary mx-auto" @onclick="LoadMoreExercises">Load More</button>
+
     </div>
 </div>
 
-
-
 @code {
+    private string[]? AllEquipment;
+    private string selectedEquipment = "";
+    private string[]? TargetMuscles;
+    private string selectedTargetMuscle = "";
+
     private string[]? BodyParts;
+    private string selectedBodyPart = "";
+
+    private bool isSearching = false;
+
+    private int countPerPage = 20;
+    private int offset = 0;
+    private int TotalExercises = 1300;
+    private string searchTerm = "";
     private List<Exercise>? allExercises;
+    private List<Exercise>? displayedExercises;
 
     protected override async Task OnInitializedAsync()
     {
-        allExercises = await Http.GetFromJsonAsync<List<Exercise>>("/exercises");
+        TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
+        AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
+
+        await LoadExercises(offset, countPerPage);
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
     }
+
+    private async Task SetSelectedBodyPart(string bodyPart)
+    {
+        selectedEquipment = "";
+        selectedTargetMuscle = "";
+        selectedBodyPart = bodyPart;
+        offset = 0;
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+        }
+        await LoadMoreExercises();
+    }
+
+    private async Task SetSelectedEquipment(string equipment)
+    {
+        selectedBodyPart = "";
+        selectedTargetMuscle = "";
+        selectedEquipment = equipment;
+        offset = 0;
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+        }
+        await LoadMoreExercises();
+    }
+
+    private async Task SetSelectedTargetMuscle(string targetMuscle)
+    {
+        selectedBodyPart = "";
+        selectedEquipment = "";
+        selectedTargetMuscle = targetMuscle;
+        offset = 0;
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+        }
+        await LoadMoreExercises();
+    }
+
+    private async Task LoadExercises(int newOffset, int limit, string bodyPartFilter = "")
+    {
+        var requestUri = $"exercises?limit={limit}&offset={newOffset}";
+        if (!string.IsNullOrEmpty(selectedBodyPart))
+        {
+            requestUri = $"exercises/bodyPart/{selectedBodyPart}?limit={limit}&offset={newOffset}";
+        }
+        else if (!string.IsNullOrEmpty(selectedEquipment))
+        {
+            requestUri = $"exercises/equipment/{selectedEquipment}?limit={limit}&offset={newOffset}";
+        }
+        else if (!string.IsNullOrEmpty(selectedTargetMuscle))
+        {
+            requestUri = $"exercises/target/{selectedTargetMuscle}?limit={limit}&offset={newOffset}";
+        }
+
+        var response = await Http.GetFromJsonAsync<List<Exercise>>(requestUri);
+        if (response is not null)
+        {
+            if (displayedExercises == null)
+            {
+                displayedExercises = new List<Exercise>();
+            }
+            displayedExercises.AddRange(response);
+            offset += response.Count;
+        }
+    }
+
+    private async Task LoadMoreExercises()
+    {
+        if (isSearching)
+        {
+            var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises/name/{searchTerm}?offset={offset}&limit={countPerPage}");
+            if (response is not null)
+            {
+                displayedExercises.AddRange(response);
+                offset += response.Count;
+            }
+        }
+        else
+        {
+            await LoadExercises(offset, countPerPage);
+        }
+    }
+
+    private async Task HandleSearch()
+    {
+        isSearching = !string.IsNullOrWhiteSpace(searchTerm);
+        offset = 0;
+
+        if (isSearching)
+        {
+            var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises/name/{searchTerm}?offset=0&limit={countPerPage}");
+            if (response is not null)
+            {
+                displayedExercises = response;
+            }
+            else
+            {
+                displayedExercises.Clear();
+            }
+        }
+        else
+        {
+            await LoadExercises(offset, countPerPage);
+        }
+    }
+
+    private async Task HandleFormSubmit()
+    {
+        await HandleSearch();
+    }
+
+    private async Task ClearFilter()
+    {
+        selectedBodyPart = "";
+        selectedEquipment = "";
+        selectedTargetMuscle = "";
+        searchTerm = "";
+        isSearching = false;
+        offset = 0;
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+        }
+        await LoadExercises(offset, countPerPage);
+    }
+
+    private void FilterExercisesByBodyPart(string bodyPart)
+    {
+        if (allExercises is not null && !string.IsNullOrWhiteSpace(bodyPart))
+        {
+            displayedExercises = allExercises.Where(exercise =>
+                exercise.BodyPart.Equals(bodyPart, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        else
+        {
+            displayedExercises = allExercises;
+        }
+    }
+
 }

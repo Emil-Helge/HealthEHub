@@ -136,6 +136,8 @@
     --bs-btn-hover-border-color: var(--accent-500);
     --bs-btn-active-bg: var(--accent-600);
     --bs-btn-active-border-color: var(--accent-600);
+    --bs-btn-disabled-bg: var(--secondary-950);
+    --bs-btn-disabled-border-color: var(--secondary-950);
 }
 
     .btn-primary:focus {

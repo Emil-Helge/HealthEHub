@@ -7,81 +7,8 @@
 
     <SlidingCards />
 
-    @if (AllEquipment != null)
-    {
-        @foreach (var equipment in AllEquipment)
-        {
-            <p>@equipment</p>
-        }
-    }
-    @if (TargetMuscles != null)
-    {
-        @foreach (var targetMuscle in TargetMuscles)
-        {
-            <p>@targetMuscle</p>
-        }
-    }
-    <input type="text" @bind="searchTerm" placeholder="Search..." />
-    <button @onclick="HandleSearch">Search</button>
-
-    @if (searchedExercises != null)
-    {
-        @foreach (var exercise in searchedExercises)
-        {
-            <p class="body-part">@exercise.BodyPart</p>
-            <p class="equipment">@exercise.Equipment</p>
-            <img src="@exercise.GifUrl" alt="Exercise Gif" title="GIF of exercise: @exercise.Name" />
-            <p class="id">@exercise.Id</p>
-            <p class="name">@exercise.Name</p>
-            <p class="target">@exercise.Target</p>
-            @if (exercise.SecondaryMuscles != null)
-            {
-                foreach (var muscle in exercise.SecondaryMuscles)
-                {
-                    <p class="secondary-muscles">@muscle</p>
-                }
-            }
-            @if (exercise.Instructions != null)
-            {
-                foreach (var instruction in exercise.Instructions)
-                {
-                    <p class="instructions">@instruction</p>
-                }
-            }
-        }
-    }
 </div>
 
 @code {
-    private string[]? AllEquipment;
-    private string[]? TargetMuscles;
-    private string searchTerm = "";
-    private List<Exercise>? allExercises;
-    private List<Exercise>? searchedExercises;
 
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
-        AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
-
-    }
-
-    private void HandleSearch()
-    {
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            searchedExercises = allExercises?.Where(exercise =>
-                exercise.Name?.ToLower().Contains(searchTerm.ToLower()) == true ||
-                exercise.Target?.ToLower().Contains(searchTerm.ToLower()) == true ||
-                exercise.Equipment?.ToLower().Contains(searchTerm.ToLower()) == true ||
-                exercise.BodyPart?.ToLower().Contains(searchTerm.ToLower()) == true
-            ).ToList();
-        }
-        else
-        {
-            searchedExercises = allExercises;
-        }
-    }
 }

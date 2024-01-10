@@ -4,10 +4,10 @@
         @foreach (var bodyPart in BodyParts)
         {
             <div class="col">
-                <div class="d-flex flex-column justify-content-center align-items-center text-center">
+                <button @onclick="() => SelectBodyPart(bodyPart)" class="btn d-flex flex-column justify-content-center align-items-center text-center">
                     <span class="body-part-title text-uppercase">@bodyPart</span>
                     <img src="@GetImagePath(bodyPart)" alt="@bodyPart" height="64" />
-                </div>
+                </button>
             </div>
         }
     </div>
@@ -17,6 +17,14 @@
 @code {
     [Parameter]
     public string[] BodyParts { get; set; } = Array.Empty<string>();
+
+    [Parameter]
+    public EventCallback<string> OnBodyPartSelected { get; set; }
+
+    private async Task SelectBodyPart(string bodyPart)
+    {
+        await OnBodyPartSelected.InvokeAsync(bodyPart);
+    }
 
 
     private Dictionary<string, string> bodyPartImageMap = new()
