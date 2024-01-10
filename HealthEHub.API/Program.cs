@@ -63,30 +63,39 @@ app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory,
 })
 .WithName("GetExerciseById");
 
-app.MapGet("/exercises", async (int offset, int limit, IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+app.MapGet("/exercises", async (int limit, int offset, IHttpClientFactory clientFactory) =>
 {
-    int MaxPages = 65;
-    int pageNumber = offset / limit + 1;
+    var client = clientFactory.CreateClient("ExerciseClient");
+    string requestUri = $"exercises?limit={limit}&offset={offset}";
 
-    if (pageNumber > MaxPages)
+    var response = await client.GetAsync(requestUri);
+    if (response.IsSuccessStatusCode)
     {
-        return Results.Problem("Page number is too high.");
-    }
-    if (app.Environment.IsDevelopment())
-    {
-        var mockExercises = mockDataService.GetExercises(offset, limit);
-        return Results.Ok(mockExercises);
+        var exercises = await response.Content.ReadFromJsonAsync<List<Exercise>>();
+        return Results.Ok(exercises);
     }
     else
     {
-        var client = clientFactory.CreateClient("ExerciseClient");
-        var response = await client.GetAsync($"exercises?offset={offset}&limit={limit}");
-        return response.IsSuccessStatusCode
-            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<Exercise>>())
-            : Results.Problem("API call failed.");
+        return Results.Problem("API call to external service failed.");
     }
-})
-.WithName("GetExercises");
+}).WithName("GetExercises");
+
+app.MapGet("/exercises/bodyPart/{bodyPart}", async (string bodyPart, int limit, int offset, IHttpClientFactory clientFactory) =>
+{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    string requestUri = $"exercises/bodyPart/{bodyPart}?limit={limit}&offset={offset}";
+
+    var response = await client.GetAsync(requestUri);
+    if (response.IsSuccessStatusCode)
+    {
+        var exercises = await response.Content.ReadFromJsonAsync<List<Exercise>>();
+        return Results.Ok(exercises);
+    }
+    else
+    {
+        return Results.Problem("API call to external service failed.");
+    }
+}).WithName("GetExercisesByBodyPart");
 
 app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
