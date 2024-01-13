@@ -1,13 +1,52 @@
 ﻿@inherits LayoutComponentBase
+@inject ThemeService ThemeService
 
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="@ThemeService.IsDarkMode" Theme="HealthEHubTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
     <Header />
-    <MudMainContent>
+    <MudMainContent MaxWidth="MaxWidth.Medium">
         @Body
     </MudMainContent>
     <Footer />
 </MudLayout>
+
+@code {
+    private bool _isDarkMode;
+
+    MudTheme HealthEHubTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Background = "#F3F6FC",
+                TextPrimary = "#070C12",
+                Primary = "#143971",
+                Secondary = "#8EA3C2",
+                Tertiary = "#045FE7",
+                Dark = "#F3F6FC",
+
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Background = "#263238",
+                TextPrimary = "#EDF2F8",
+                Primary = "#8EB3EB",
+                Secondary = "#3D5171",
+                Tertiary = "#1873FB",
+                Dark = "#263238",
+            },
+        };
+
+    protected override void OnInitialized()
+    {
+        ThemeService.OnThemeChanged += StateHasChanged;
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}

@@ -1,44 +1,18 @@
-@import url('https://fonts.googleapis.com/css?family=Raleway:700|Lato:400');
-
-:root {
-    --heading-font: 'Raleway', sans-serif;
-    --body-font: 'Lato', sans-serif;
-    --font-size: 1rem;
+.mud-nav-item {
+    width: auto !important;
 }
 
-html, body {
-    background: var(--background);
-    height: 100%;
-    font-size: var(--font-size);
-    font-family: var(--body-font);
-    font-weight: 400;
+    .mud-nav-item:hover {
+        border-bottom: 1px solid var(--mud-palette-primary);
+    }
+
+.mud-nav-link {
+    display: flex;
+    gap: 0.5rem;
 }
 
-#app {
-    height: 100%;
-}
-
-h1:focus {
-    outline: none;
-}
-
-h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
-    font-family: var(--heading-font);
-    font-weight: 700;
-    margin: 0;
-    color: var(--text);
-}
-
-p {
-    margin: 0;
-}
-
-p, span, label, input, button, select, option, textarea, li, strong {
-    color: var(--text);
-}
-
-i {
-    font-size: 1.5rem;
+.mud-nav-link-text {
+    margin-left: 0 !important;
 }
 
 /* #region Boilerplate default styles */
