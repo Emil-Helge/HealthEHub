@@ -2,10 +2,6 @@
     width: auto !important;
 }
 
-    .mud-nav-item:hover {
-        border-bottom: 1px solid var(--mud-palette-primary);
-    }
-
 .mud-nav-link {
     display: flex;
     gap: 0.5rem;
