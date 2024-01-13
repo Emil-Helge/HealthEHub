@@ -3,29 +3,29 @@
 
 <PageTitle>Exercises</PageTitle>
 
-<div class="container-xxl py-3">
+<div>
 
 
     <ExerciseTargetMuscle TargetMuscles="@TargetMuscles" OnTargetMuscleSelected="SetSelectedTargetMuscle" />
     <ExerciseEquipment AllEquipment="@AllEquipment" OnEquipmentSelected="SetSelectedEquipment" />
     <ExerciseBodyPart BodyParts="@BodyParts" OnBodyPartSelected="SetSelectedBodyPart" />
-    <form class="d-flex" @onsubmit="HandleFormSubmit">
-        <input class="form-control me-2" type="search" placeholder="Search by exercise name" aria-label="Search" @bind="searchTerm">
-        <button class="btn btn-outline" type="submit">
-            <i class="bi bi-search"></i>
+    <form @onsubmit="HandleFormSubmit">
+        <input type="search" placeholder="Search by exercise name" aria-label="Search" @bind="searchTerm">
+        <button type="submit">
+            <i></i>
         </button>
     </form>
 
 
     <p>Selected Body Part: @selectedBodyPart</p>
-    <button class="btn btn-secondary" @onclick="ClearFilter">Clear</button>
-    <div class="d-flex flex-column justify-content-between my-3">
-        <div class="row row-cols-2 row-cols-lg-4 row-cols-xl-5 g-3 justify-content-center justify-content-md-start">
+    <button @onclick="ClearFilter">Clear</button>
+    <div>
+        <div>
             @if (displayedExercises is not null && displayedExercises.Count > 0)
             {
                 @foreach (Exercise exercise in displayedExercises)
                 {
-                    <div class="col">
+                    <div>
                         <ExerciseCard Exercise="exercise" />
                     </div>
                 }
@@ -34,13 +34,13 @@
             {
                 for (int i = 0; i < countPerPage; i++)
                 {
-                    <div class="col">
+                    <div>
                         <ExerciseCard />
                     </div>
                 }
             }
         </div>
-        <button class="btn btn-primary mx-auto" @onclick="LoadMoreExercises">Load More</button>
+        <button @onclick="LoadMoreExercises">Load More</button>
 
     </div>
 </div>
