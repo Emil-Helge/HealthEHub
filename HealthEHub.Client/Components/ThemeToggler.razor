@@ -1,0 +1,10 @@
+﻿@inject ThemeService ThemeService
+
+<MudToggleIconButton @bind-Toggled="@ThemeService.IsDarkMode" Color="Color.Primary" ToggledColor="Color.Primary" Class="ma-4" T="bool" Icon="@Icons.Material.Filled.DarkMode" ToggledIcon="@Icons.Material.Filled.LightMode" Title="Toggle Theme" />
+
+@code {
+    private void ToggleTheme()
+    {
+        ThemeService.IsDarkMode = !ThemeService.IsDarkMode;
+    }
+}

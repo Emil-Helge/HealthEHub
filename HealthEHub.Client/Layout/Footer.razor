@@ -1,29 +1,8 @@
-﻿<footer class="footerStyle p-3 flex-shrink-0">
-    <div class="container-xxl">
-        <div class="row row-cols-1 row-cols-md-3 text-center align-items-center gap-3 gap-md-0">
-            <div class="col text-md-start order-last order-md-first">
-                <div class="col-12">
-                    &copy; 2023 Emil Helgesson
-                </div>
-            </div>
-            <div class="col text-center">
-                <img src="images/white-logo.png" alt="logo" height="48" />
-            </div>
-            <div class="col text-md-end">
-                <div class="row">
-                    <div class="col-12">
-                        <a href="https://www.linkedin.com/in/emil-helgesson94/"><i class="bi bi-linkedin"></i></a>
-                        <a href="https://github.com/Emil-Helge"><i class="bi bi-github"></i></a>
-                    </div>
-                    <div class="col-12">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-
-
-@code {
-
-}
+﻿<MudAppBar Bottom="true" Breakpoint="Breakpoint.Md" Color="Color.Dark" Elevation="0">
+    <MudText Color="Color.Primary">&copy; 2023 Emil Helgesson</MudText>
+    <MudSpacer />
+    <MudButtonGroup Color="Color.Primary">
+        <MudIconButton Target="blank" Icon="@Icons.Custom.Brands.LinkedIn" Href="https://www.linkedin.com/in/emil-helgesson94/" />
+        <MudIconButton Target="blank" Icon="@Icons.Custom.Brands.GitHub" Href="https://github.com/Emil-Helge" />
+    </MudButtonGroup>
+</MudAppBar>

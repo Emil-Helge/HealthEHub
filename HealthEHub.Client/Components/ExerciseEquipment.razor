@@ -1,10 +1,10 @@
 ﻿@if (AllEquipment is not null)
 {
     <h1>Equipment:</h1>
-    <div class="d-flex gap-2 flex-wrap">
+    <div>
         @foreach (var equipment in AllEquipment)
         {
-            <button class="btn btn-outline-primary" @onclick="() => SelectEquipment(equipment)">@equipment</button>
+            <button @onclick="() => SelectEquipment(equipment)">@equipment</button>
         }
     </div>
 }

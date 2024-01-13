@@ -5,38 +5,38 @@
 @if (exercise is not null)
 {
     <PageTitle>Details for @exercise?.Name</PageTitle>
-    <div class="hero-bg">
-        <div class="hero-container">
-            <div class="container-xxl d-flex flex-column flex-md-row">
-                <div class="flex-grow-1 d-flex align-items-center justify-content-center justify-content-md-end">
-                    <div class="title-container text-center text-md-end">
+    <div>
+        <div>
+            <div>
+                <div>
+                    <div>
                         <h1>@exercise.Name</h1>
                     </div>
                 </div>
-                <div class="order-last order-md-first d-flex justify-content-center">
-                    <div class="gif-container">
+                <div>
+                    <div>
                         <img src="@exercise.GifUrl" alt="@exercise.Name" />
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="container-xxl">
-        <div class="details">
-            <div class="d-flex flex-column flex-md-row gap-3">
-                <div class="instructions">
+    <div>
+        <div>
+            <div>
+                <div>
                     <h3>Instructions</h3>
-                    <ul class="list-group">
+                    <ul>
                         @if (exercise.Instructions is not null)
                         {
                             foreach (var instruction in exercise.Instructions)
                             {
-                                <li class="instruction list-group-item">@instruction</li>
+                                <li>@instruction</li>
                             }
                         }
                     </ul>
                 </div>
-                <div class="overview">
+                <div>
                     <h6>Body part:</h6>
                     <p>@exercise.BodyPart</p>
                     <h6>Equipment:</h6>
@@ -44,29 +44,29 @@
                     <h6>Target muscle:</h6>
                     <p>@exercise.Target</p>
 
-                    <div class="secondary-muscles">
+                    <div>
                         <h6>Secondary muscles:</h6>
                         @if (exercise.SecondaryMuscles is not null)
                         {
                             foreach (var muscle in exercise.SecondaryMuscles)
                             {
-                                <p class="secondary-muscles">@muscle</p>
+                                <p>@muscle</p>
                             }
                         }
                     </div>
                 </div>
             </div>
-            <hr class="my-5" />
+            <hr />
             <h3>Video</h3>
             @if (youtubeSearchResult?.Contents is not null)
             {
                 @foreach (var content in youtubeSearchResult.Contents.Take(1))
                 {
                     var video = content.Video;
-                    <div class="ratio ratio-16x9">
-                        <iframe class="embed-responsive-item rounded" src="https://www.youtube.com/embed/@video.VideoId" allowfullscreen alt="@video.Title"></iframe>
+                    <div>
+                        <iframe src="https://www.youtube.com/embed/@video.VideoId" allowfullscreen alt="@video.Title"></iframe>
                     </div>
-                    <p class="text-secondary text-end">Created by: @video.ChannelName</p>
+                    <p>Created by: @video.ChannelName</p>
                 }
             }
             else

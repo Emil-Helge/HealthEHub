@@ -1,10 +1,10 @@
 ﻿@if (TargetMuscles is not null)
 {
     <h1>Target Muscle:</h1>
-    <div class="d-flex gap-2 flex-wrap">
+    <div>
         @foreach (var targetMuscle in TargetMuscles)
         {
-            <button class="btn btn-outline-primary" @onclick="() => SelectTargetMuscle(targetMuscle)">@targetMuscle</button>
+            <button @onclick="() => SelectTargetMuscle(targetMuscle)">@targetMuscle</button>
         }
     </div>
 }

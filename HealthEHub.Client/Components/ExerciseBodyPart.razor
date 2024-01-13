@@ -1,11 +1,11 @@
 ﻿@if (BodyParts is not null)
 {
-    <div class="row">
+    <div>
         @foreach (var bodyPart in BodyParts)
         {
-            <div class="col">
-                <button @onclick="() => SelectBodyPart(bodyPart)" class="btn d-flex flex-column justify-content-center align-items-center text-center">
-                    <span class="body-part-title text-uppercase">@bodyPart</span>
+            <div>
+                <button @onclick="() => SelectBodyPart(bodyPart)">
+                    <span>@bodyPart</span>
                     <img src="@GetImagePath(bodyPart)" alt="@bodyPart" height="64" />
                 </button>
             </div>
