@@ -3,9 +3,7 @@
 
 <PageTitle>Exercises</PageTitle>
 
-<div>
-
-
+<MudItem xs="12">
     <ExerciseTargetMuscle TargetMuscles="@TargetMuscles" OnTargetMuscleSelected="SetSelectedTargetMuscle" />
     <ExerciseEquipment AllEquipment="@AllEquipment" OnEquipmentSelected="SetSelectedEquipment" />
     <ExerciseBodyPart BodyParts="@BodyParts" OnBodyPartSelected="SetSelectedBodyPart" />
@@ -15,35 +13,32 @@
             <i></i>
         </button>
     </form>
-
-
     <p>Selected Body Part: @selectedBodyPart</p>
     <button @onclick="ClearFilter">Clear</button>
-    <div>
-        <div>
-            @if (displayedExercises is not null && displayedExercises.Count > 0)
-            {
-                @foreach (Exercise exercise in displayedExercises)
-                {
-                    <div>
-                        <ExerciseCard Exercise="exercise" />
-                    </div>
-                }
-            }
-            else
-            {
-                for (int i = 0; i < countPerPage; i++)
-                {
-                    <div>
-                        <ExerciseCard />
-                    </div>
-                }
-            }
-        </div>
-        <button @onclick="LoadMoreExercises">Load More</button>
+</MudItem>
 
-    </div>
-</div>
+<MudGrid>
+    @if (displayedExercises is not null && displayedExercises.Count > 0)
+    {
+        @foreach (Exercise exercise in displayedExercises)
+        {
+            <MudItem xs="12" md="6" lg="4">
+                <ExerciseCard Exercise="exercise" />
+            </MudItem>
+        }
+    }
+    else
+    {
+        for (int i = 0; i < countPerPage; i++)
+        {
+            <MudItem xs="12" md="6">
+                <ExerciseCard />
+            </MudItem>
+        }
+    }
+
+</MudGrid>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises">Load More </MudButton>
 
 @code {
     private string[]? AllEquipment;
