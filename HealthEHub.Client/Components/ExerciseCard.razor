@@ -34,29 +34,29 @@
 }
 else
 {
-    <div>
-        @* TODO: ADD SUITABLE PLACEHOLDER IMAGE THAT MATCHES SIZE OF GIFURL *@
-        <img alt="Exercise Gif" src="..." />
-        <div>
-            <h5>
-                <span></span>
-            </h5>
-            <p>
-                <span></span>
-            </p>
-            <p>
-                <span></span>
-            </p>
-            <p>
-                <span></span>
-            </p>
-        </div>
-        <div>
-            <button>
-                Details
-            </button>
-        </div>
-    </div>
+    <MudCard Class="ma-3">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudSkeleton Width="30%" Height="42px;" Class="ml-auto mr-auto" />
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudDivider />
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="360px" />
+        <MudCardContent>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Class="gap-0 flex-wrap" Style="gap: 0;">
+                <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+                <MudSpacer />
+                <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+                <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+                <MudSkeleton Width="64px" Height="40px" Class="ml-2" />
+            </MudStack>
+        </MudCardContent>
+        <MudDivider />
+        <MudSpacer />
+        <MudCardActions>
+            <MudSkeleton Width="105px" Height="40px" Class="ml-auto mr-auto" />
+        </MudCardActions>
+    </MudCard>
 }
 
 @code {
