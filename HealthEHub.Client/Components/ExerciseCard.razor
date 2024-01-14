@@ -1,6 +1,6 @@
 ﻿@if (Exercise is not null)
 {
-    <MudCard Style="height: 533px;">
+    <MudCard>
         <MudCardHeader>
             <CardHeaderContent>
                 <MudText Typo="Typo.h6" Align="Align.Center">
@@ -10,8 +10,8 @@
         </MudCardHeader>
         <MudDivider />
         <MudImage Fluid="true" Src="@Exercise.GifUrl" Alt="Exercise GIF" Class="rounded-lg" Style="margin-top: 0.25rem; margin-bottom: 0.25rem; display: block; margin-left: auto; margin-right: auto;" />
-        <MudCardContent Style="padding: 0 1rem;">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Class="gap-0" Style="gap: 0;">
+        <MudCardContent Style="padding: 0 0.5rem;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Class="gap-0 flex-wrap" Style="gap: 0;">
                 <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" Class="p-0" />
                 <MudSpacer />
                 <MudChip Variant="Variant.Text" Color="Color.Primary">
