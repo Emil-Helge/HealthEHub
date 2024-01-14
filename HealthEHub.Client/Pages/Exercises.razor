@@ -22,7 +22,7 @@
     {
         @foreach (Exercise exercise in displayedExercises)
         {
-            <MudItem xs="12" md="6" lg="4">
+            <MudItem xs="12" lg="6">
                 <ExerciseCard Exercise="exercise" />
             </MudItem>
         }
@@ -38,7 +38,7 @@
     }
 
 </MudGrid>
-<MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises">Load More </MudButton>
+<MudButton Class="mt-2" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises">Load More </MudButton>
 
 @code {
     private string[]? AllEquipment;
