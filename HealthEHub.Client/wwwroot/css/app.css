@@ -25,6 +25,7 @@
     .main-content-container {
         margin-top: calc(var(--mud-appbar-height) + 2rem);
         margin-bottom: calc(var(--mud-appbar-height) + 2rem);
+        padding: 0;
     }
 }
 
