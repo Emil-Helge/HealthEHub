@@ -5,14 +5,18 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
+
+<MudLayout Class="d-flex flex-column" Style="min-height: 100%;">
     <Header />
-    <MudContainer MaxWidth="MaxWidth.Large" class="main-content-container">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="flex-grow-1 main-content-container">
         <MudGrid>
             @Body
         </MudGrid>
     </MudContainer>
     <Footer />
+    <MudScrollToTop>
+        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" Class="mb-16" />
+    </MudScrollToTop>
 </MudLayout>
 
 @code {
