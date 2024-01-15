@@ -1,0 +1,10 @@
+﻿<MudTooltip Color="Color.Primary">
+    <MudChip Variant="Variant.Text" Color="Color.Primary">
+        @ChipText.ToUpper()
+    </MudChip>
+</MudTooltip>
+
+@code {
+    [Parameter]
+    public string ChipText { get; set; } = string.Empty;
+}
