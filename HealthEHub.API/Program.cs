@@ -47,19 +47,19 @@ app.UseHttpsRedirection();
 
 app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
 {
-    if (app.Environment.IsDevelopment())
-    {
-        var mockExercise = mockDataService.GetExerciseById(id);
-        return Results.Ok(mockExercise);
-    }
-    else
-    {
-        var client = clientFactory.CreateClient("ExerciseClient");
-        var response = await client.GetAsync($"/exercises/exercise/{id}");
-        return response.IsSuccessStatusCode
-            ? Results.Ok(await response.Content.ReadFromJsonAsync<Exercise>())
-            : Results.Problem("API call failed.");
-    }
+    //if (app.Environment.IsDevelopment())
+    //{
+    //    var mockExercise = mockDataService.GetExerciseById(id);
+    //    return Results.Ok(mockExercise);
+    //}
+    //else
+    //{
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync($"/exercises/exercise/{id}");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<Exercise>())
+        : Results.Problem("API call failed.");
+    //}
 })
 .WithName("GetExerciseById");
 
