@@ -171,8 +171,16 @@
     private async Task HandleFormSubmit(string searchTerm)
     {
         this.searchTerm = searchTerm;
+
+        if (displayedExercises is not null)
+        {
+            displayedExercises.Clear();
+            offset = 0;
+        }
+
         await HandleSearch();
     }
+
 
 
     private async Task ClearFilter()
