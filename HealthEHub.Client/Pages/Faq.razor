@@ -2,47 +2,37 @@
 
 <PageTitle>Frequently Asked Questions</PageTitle>
 
-<div>
-    <div>
-        <div>
-            <h1>Frequently Asked Questions</h1>
-            <img src="images/faq.svg" alt="depiction of a woman delivering an envelope" height="330" />
-        </div>
-        <hr />
-        <section>
-            <article>
-                <h6>Q: What is <span>HealthEHub</span> all about?</h6>
-                <p><strong>A:</strong> HealthEHub is your go-to source for all things health and fitness. My mission is to create a centralized hub where you can easily access a wealth of information and inspiration.</p>
-                <p>Whether you're looking for guidance on specific exercises, seeking the right workout for particular equipment or muscle groups, or just exploring ways to enhance your fitness journey, HealthEHub has you covered.</p>
-                <p>I'm dedicated to making it simpler for you to find reliable, practical information that empowers your health and fitness goals.</p>
-                <img />
-            </article>
-            <article>
-                <h6>Q: How often is the content updated?</h6>
-                <p><strong>A:</strong> The majority of the content on HealthEHub is sourced from external sources. I regularly monitor these sources to ensure the information displayed on the site is current and accurate.</p>
-                <p>My goal is to provide you with the most up-to-date and reliable health and fitness information.</p>
-                <p>Typically, I review and refresh content from these sources on a weekly basis to maintain the high standard of information you deserve.</p>
-                <img />
-            </article>
-            <article>
-                <h6>Do I need an account to use HealthEHub?</h6>
-                <p><strong>A:</strong> No, there is no requirement to have an account to use this website.</p>
-                <img />
-            </article>
-            <article>
-                <h6>Can I provide feedback about HealthEHub?</h6>
-                <p>
-                    <strong>A:</strong> Absolutely! Your feedback is invaluable. please send any comments or suggestions to
-                    <a href="mailto:healthehubinfo@gmail.com" target="_blank">
+<MudItem xs="12" role="alert" Class="d-flex flex-column">
+    <MudText Typo="Typo.h3" Align="Align.Center">Frequently Asked Questions</MudText>
+    <MudImage Src="images/faq.svg" Alt="depiction of a woman delivering an envelope" Height="330" />
+</MudItem>
+<MudItem xs="12" Class="d-flex flex-column">
+    <MudCard Class="pa-6">
+        <MudExpansionPanels>
+            <MudExpansionPanel Text="What is HealthEHub all about?" IsInitiallyExpanded="true">
+                <MudText>HealthEHub is your go-to source for all things health and fitness. My mission is to create a centralized hub where you can easily access a wealth of information and inspiration.</MudText>
+                <MudText>Whether you're looking for guidance on specific exercises, seeking the right workout for particular equipment or muscle groups, or just exploring ways to enhance your fitness journey, HealthEHub has you covered.</MudText>
+                <MudText>I'm dedicated to making it simpler for you to find reliable, practical information that empowers your health and fitness goals.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text="How often is the content updated?">
+                <MudText>The majority of the content on HealthEHub is sourced from external sources. I regularly monitor these sources to ensure the information displayed on the site is current and accurate.</MudText>
+                <MudText>My goal is to provide you with the most up-to-date and reliable health and fitness information.</MudText>
+                <MudText>Typically, I review and refresh content from these sources on a weekly basis to maintain the high standard of information you deserve.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text="Do I need an account to use HealthEHub?">
+                <MudText>No, there is no requirement to have an account to use this website.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text="Can I provide feedback about HealthEHub?">
+                <MudText>
+                    Absolutely! Your feedback is invaluable. please send any comments or suggestions to
+                    <MudLink Href="mailto:healthehubinfo@gmail.com" Target="_blank">
                         HealthEHubInfo@gmail.com
-                    </a>
-                </p>
-
-                <img />
-            </article>
-        </section>
-    </div>
-</div>
+                    </MudLink>
+                </MudText>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    </MudCard>
+</MudItem>
 
 @code {
 

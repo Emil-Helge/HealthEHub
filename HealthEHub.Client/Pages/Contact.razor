@@ -3,36 +3,33 @@
 
 <PageTitle>Contact</PageTitle>
 
-<div>
-    <div>
-        <div>
-            <h1>Get in Touch!</h1>
-            <img src="images/contact.svg" alt="depiction of a woman delivering an envelope" height="330" />
-        </div>
-        <hr />
-        <section>
-            <article>
-                <h6><span>Connect</span> With Me</h6>
-                <p>If you have questions, need support, or want to share your thoughts, I'm just an email away. Your feedback and inquiries are always welcome, and I'm committed to providing you with the assistance you need.</p>
-            </article>
-            <article>
-                <h6>How to Reach Me</h6>
-                <p>Email is the quickest and most efficient way to get in touch with me. Whether you have a question, feedback, or need support, I'm here to help.</p>
-                <h6>Email Address:</h6>
-                <a href="mailto:healthehubinfo@gmail.com" target="_blank">
+<MudItem xs="12" role="alert" Class="d-flex flex-column">
+    <MudText Typo="Typo.h3" Align="Align.Center">Get in Touch!</MudText>
+    <MudImage Src="images/contact.svg" Alt="depiction of a woman delivering an envelope" Height="330" />
+</MudItem>
+<MudItem xs="12" Class="d-flex flex-column">
+    <MudCard Class="pa-6">
+        <MudExpansionPanels>
+            <MudExpansionPanel Text="Connect With Me" IsInitiallyExpanded="true">
+                <MudText>If you have questions, need support, or want to share your thoughts, I'm just an email away. Your feedback and inquiries are always welcome, and I'm committed to providing you with the assistance you need.</MudText>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text="How to Reach Me">
+                <MudText>Email is the quickest and most efficient way to get in touch with me. Whether you have a question, feedback, or need support, I'm here to help.</MudText>
+                <MudText Typo="Typo.subtitle2">Email Address:</MudText>
+                <MudLink Href="mailto:healthehubinfo@gmail.com" Target="_blank">
                     HealthEHubInfo@gmail.com
-                </a>
-                <i></i>
-            </article>
-            <article>
-                <h6>Additional Resources</h6>
-                <p>For quick answers, you might find what you're looking for on the <a href="/faq">FAQ</a> page.</p>
-            </article>
-        </section>
-    </div>
-</div>
+                </MudLink>
+            </MudExpansionPanel>
+            <MudExpansionPanel Text="Additional Resources">
+                <MudStack Row AlignItems="AlignItems.End" Justify="Justify.SpaceBetween">
+                     <MudText>For quick answers, you might find what you're looking for on the <MudLink Href="/faq">FAQ</MudLink> page.</MudText>
+                     <MudImage Height="58" Src="images/faq.svg" />
+                 </MudStack>
+             </MudExpansionPanel>
+         </MudExpansionPanels>
+     </MudCard>
+ </MudItem>
 
-
-@code {
+ @code {
 
 }

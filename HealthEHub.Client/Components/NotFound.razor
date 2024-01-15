@@ -1,31 +1,33 @@
-﻿<div role="alert">
-    <div>
-        <div>
-            <h1>Oops! This Page Can't be Found</h1>
-            <img src="images/not-found.svg" alt="page not found image" height="330" />
-        </div>
-        <div>
-            <h6>It looks like the page you're trying to reach doesn't exist or may have been moved. I'm sorry for the inconvenience!</h6>
-            <hr />
-            <strong>Here's what you can do next:</strong>
-            <ul>
-                <li>
-                    <strong>Double-check the URL:</strong>If you typed the URL yourself, please make sure you spelled it correctly.
-                </li>
-                <li>
-                    <strong>Head Back to The Homepage:</strong> Start from square one and navigate to your desired page from there.
-                </li>
-                <li>
-                    <strong>Need Assistance?</strong> If you're stuck, feel free to contact me.
-                </li>
-            </ul>
-        </div>
-        <div>
-            <a href="/">Back To Home</a>
-            <a href="/contact">Contact Me</a>
-        </div>
-    </div>
-</div>
+﻿<MudItem xs="12" role="alert" Class="d-flex flex-column">
+    <MudText Typo="Typo.h3" Align="Align.Center">Oops! This Page Can't be Found</MudText>
+    <MudImage Src="images/not-found.svg" Alt="page not found image" Height="330" />
+</MudItem>
+<MudItem xs="12" Class="d-flex flex-column">
+    <MudCard Class="pa-6">
+        <MudText Typo="Typo.h5">It looks like the page you're trying to reach doesn't exist or may have been moved. I'm sorry for the inconvenience!</MudText>
+        <MudDivider Class="my-2" />
+        <MudList>
+            <MudListItem>
+                <MudText Typo="Typo.h6">Here's what you can do next:</MudText>
+            </MudListItem>
+            <MudListItem>
+                <MudText Typo="Typo.subtitle1" Color="Color.Info" Class="d-inline">Double-check the URL:</MudText>If you typed the URL yourself, please make sure you spelled it correctly.
+            </MudListItem>
+            <MudListItem>
+                <MudText Typo="Typo.subtitle1" Color="Color.Info" Class="d-inline">Head Back to The Homepage:</MudText> Start from square one and navigate to your desired page from there.
+            </MudListItem>
+            <MudListItem>
+                <MudText Typo="Typo.subtitle1" Color="Color.Info" Class="d-inline">Need Assistance?</MudText> If you're stuck, feel free to contact me.
+            </MudListItem>
+        </MudList>
+    </MudCard>
+</MudItem>
+<MudItem xs="12" Class="d-flex flex-column align-center">
+    <MudButtonGroup Variant="Variant.Outlined">
+        <MudButton Href="/">Back To Home</MudButton>
+        <MudButton Href="/contact">Contact Me</MudButton>
+    </MudButtonGroup>
+</MudItem>
 
 @code {
 
