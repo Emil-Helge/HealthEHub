@@ -14,7 +14,7 @@ builder.Services.AddScoped(sp =>
 {
     string apiBaseUrl = environment.IsDevelopment()
         ? "https://localhost:7024/"  // Local API for development
-        : "https://healthhubappapi.azurewebsites.net/";  // Deployed API for production
+        : "https://healthehubappapi.azurewebsites.net/";  // Deployed API for production
 
     return new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
 });
