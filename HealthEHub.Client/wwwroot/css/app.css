@@ -3,6 +3,10 @@ html, body, #app {
     margin: 0;
 }
 
+iframe {
+    aspect-ratio: 1/1;
+}
+
 .mud-grid-spacing-xs-3 {
     width: 100% !important;
     margin: 0 !important;
@@ -28,7 +32,6 @@ html, body, #app {
 @media (min-width: 600px) {
     .main-content-container {
         margin-top: calc(var(--mud-appbar-height) + 2rem);
-        padding: 0;
     }
 }
 

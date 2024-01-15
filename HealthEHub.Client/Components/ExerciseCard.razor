@@ -1,34 +1,28 @@
-﻿@if (Exercise is not null)
+﻿@if (exercise is not null)
 {
     <MudCard>
         <MudCardHeader>
             <CardHeaderContent>
                 <MudText Typo="Typo.h6" Align="Align.Center">
-                    @Exercise.Name
+                    @exercise.Name
                 </MudText>
             </CardHeaderContent>
         </MudCardHeader>
         <MudDivider />
-        <MudImage Fluid="true" Src="@Exercise.GifUrl" Alt="Exercise GIF" Class="rounded-lg" Style="margin-top: 0.25rem; margin-bottom: 0.25rem; display: block; margin-left: auto; margin-right: auto;" />
+        <MudImage Fluid="true" Src="@exercise.GifUrl" Alt="Exercise GIF" Class="rounded-lg" Style="margin-top: 0.25rem; margin-bottom: 0.25rem; display: block; margin-left: auto; margin-right: auto;" />
         <MudCardContent Style="padding: 0 0.5rem;">
             <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Class="gap-0 flex-wrap" Style="gap: 0;">
                 <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" Class="p-0" />
                 <MudSpacer />
-                <MudChip Variant="Variant.Text" Color="Color.Primary">
-                    @Exercise.Target.ToUpper()
-                </MudChip>
-                <MudChip Variant="Variant.Text" Color="Color.Primary">
-                    @Exercise.BodyPart.ToUpper()
-                </MudChip>
-                <MudChip Variant="Variant.Text" Color="Color.Primary">
-                    @Exercise.Equipment.ToUpper()
-                </MudChip>
+                <ChipPrimary ChipText="@exercise.BodyPart" />
+                <ChipPrimary ChipText="@exercise.Equipment" />
+                <ChipPrimary ChipText="@exercise.Target" />
             </MudStack>
         </MudCardContent>
         <MudDivider />
         <MudSpacer />
         <MudCardActions>
-            <MudButton Href="@($"/exercise/{Exercise.Id}")" FullWidth="true" Variant="Variant.Text" Color="Color.Primary">DETAILS</MudButton>
+            <MudButton Href="@($"/exercise/{exercise.Id}")" FullWidth="true" Variant="Variant.Text" Color="Color.Primary">DETAILS</MudButton>
         </MudCardActions>
     </MudCard>
 }
@@ -61,5 +55,5 @@ else
 
 @code {
     [Parameter]
-    public Exercise? Exercise { get; set; }
+    public Exercise? exercise { get; set; }
 }
