@@ -13,7 +13,7 @@
 
     </MudStack>
     <MudForm OnValidSubmit="HandleFormSubmit">
-        <MudTextField T="string" Label="Search for an exercise" aria-label="Search" Value="@searchTerm" ValueChanged="@(value => searchTerm = value)" Immediate="true" Clearable="true" Adornment="Adornment.End" />
+        <MudTextField T="string" Label="Search for an exercise by name" aria-label="Search" Value="@searchTerm" ValueChanged="@(value => searchTerm = value)" Immediate="true" Clearable="true" Adornment="Adornment.End" OnKeyDown="@HandleKeyDown" />
         <MudStack Row="true">
             <MudButton Class="mt-2" Color="Color.Primary" FullWidth EndIcon="@Icons.Material.Filled.Search" Variant="Variant.Text" Type="ButtonType.Button" OnClick="HandleFormSubmit">Search</MudButton>
          </MudStack>
@@ -62,5 +62,13 @@
     private async Task ClearFilter()
     {
         await OnClearFilters.InvokeAsync();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await HandleFormSubmit();
+        }
     }
 }
