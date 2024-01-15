@@ -1,12 +1,11 @@
 ﻿@if (TargetMuscles is not null)
 {
-    <h1>Target Muscle:</h1>
-    <div>
-        @foreach (var targetMuscle in TargetMuscles)
-        {
-            <button @onclick="() => SelectTargetMuscle(targetMuscle)">@targetMuscle</button>
-        }
-    </div>
+    @foreach (var targetMuscle in TargetMuscles)
+    {
+        <MudMenuItem @onclick="() => SelectTargetMuscle(targetMuscle)">
+            @targetMuscle
+        </MudMenuItem>
+    }
 }
 
 @code {

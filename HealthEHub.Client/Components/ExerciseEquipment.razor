@@ -1,12 +1,11 @@
 ﻿@if (AllEquipment is not null)
 {
-    <h1>Equipment:</h1>
-    <div>
-        @foreach (var equipment in AllEquipment)
-        {
-            <button @onclick="() => SelectEquipment(equipment)">@equipment</button>
-        }
-    </div>
+    @foreach (var equipment in AllEquipment)
+    {
+        <MudMenuItem @onclick="() => SelectEquipment(equipment)">
+            @equipment
+        </MudMenuItem>
+    }
 }
 
 @code {

@@ -1,15 +1,11 @@
 ﻿@if (BodyParts is not null)
 {
-    <div>
-        @foreach (var bodyPart in BodyParts)
-        {
-            <div>
-                <button @onclick="() => SelectBodyPart(bodyPart)">
-                    <span>@bodyPart</span>
-                </button>
-            </div>
-        }
-    </div>
+    @foreach (var bodyPart in BodyParts)
+    {
+        <MudMenuItem @onclick="() => SelectBodyPart(bodyPart)">
+            @bodyPart
+        </MudMenuItem>
+    }
 }
 
 
