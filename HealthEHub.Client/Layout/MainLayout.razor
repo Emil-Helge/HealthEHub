@@ -5,14 +5,18 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
+
+<MudLayout Class="d-flex flex-column" Style="min-height: 100%;">
     <Header />
-    <MudContainer MaxWidth="MaxWidth.Large" class="main-content-container">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="flex-grow-1 main-content-container">
         <MudGrid>
             @Body
         </MudGrid>
     </MudContainer>
     <Footer />
+    <MudScrollToTop>
+        <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" Class="mb-16" />
+    </MudScrollToTop>
 </MudLayout>
 
 @code {
@@ -26,9 +30,8 @@
                 TextPrimary = "#070C12",
                 Primary = "#143971",
                 Secondary = "#8EA3C2",
-                Tertiary = "#045FE7",
+                Tertiary = "#d6e0f5",
                 Dark = "#F3F6FC",
-
             },
             PaletteDark = new PaletteDark()
             {
@@ -36,7 +39,7 @@
                 TextPrimary = "#EDF2F8",
                 Primary = "#8EB3EB",
                 Secondary = "#3D5171",
-                Tertiary = "#1873FB",
+                Tertiary = "#0a1429",
                 Dark = "#263238",
             },
         };

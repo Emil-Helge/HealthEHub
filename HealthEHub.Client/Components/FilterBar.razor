@@ -1,0 +1,66 @@
+﻿<MudStack>
+    <MudStack Class="d-flex flex-column flex-sm-row">
+        <MudMenu MaxHeight="300" ActivationEvent="@MouseEvent.MouseOver" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft" Label="Target Muscle" Color="Color.Primary">
+            <ExerciseTargetMuscle TargetMuscles="@TargetMuscles" OnTargetMuscleSelected="OnTargetMuscleSelected" />
+        </MudMenu>
+        <MudMenu MaxHeight="300" ActivationEvent="@MouseEvent.MouseOver" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft" Label="Equipment" Color="Color.Primary">
+            <ExerciseEquipment AllEquipment="@AllEquipment" OnEquipmentSelected="OnEquipmentSelected" />
+        </MudMenu>
+        <MudMenu MaxHeight="300" ActivationEvent="@MouseEvent.MouseOver" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft" Label="Body Parts" Color="Color.Primary">
+            <ExerciseBodyPart BodyParts="@BodyParts" OnBodyPartSelected="OnBodyPartSelected" />
+        </MudMenu>
+        <MudButton Class="mr-sm-0 ml-auto mr-auto" Color="Color.Warning" Variant="Variant.Text" @onclick="ClearFilter">Clear Filter</MudButton>
+
+    </MudStack>
+    <MudForm OnValidSubmit="HandleFormSubmit">
+        <MudTextField T="string" Label="Search for an exercise" aria-label="Search" Value="@searchTerm" ValueChanged="@(value => searchTerm = value)" Immediate="true" Clearable="true" Adornment="Adornment.End" />
+        <MudStack Row="true">
+            <MudButton Class="mt-2" Color="Color.Primary" FullWidth EndIcon="@Icons.Material.Filled.Search" Variant="Variant.Text" Type="ButtonType.Button" OnClick="HandleFormSubmit">Search</MudButton>
+         </MudStack>
+     </MudForm>
+ </MudStack>
+
+ @code {
+    [Parameter]
+    public string[]? TargetMuscles { get; set; }
+    [Parameter]
+    public string[]? AllEquipment { get; set; }
+    [Parameter]
+    public string[]? BodyParts { get; set; }
+
+    [Parameter]
+    public string? searchTerm { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnTargetMuscleSelected { get; set; }
+    [Parameter]
+    public EventCallback<string> OnEquipmentSelected { get; set; }
+    [Parameter]
+    public EventCallback<string> OnBodyPartSelected { get; set; }
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+    [Parameter]
+    public EventCallback<string> OnFormSubmit { get; set; }
+    [Parameter]
+    public EventCallback OnClearFilters { get; set; }
+
+    [Parameter]
+    public EventCallback<string> searchTermChanged { get; set; }
+
+    private async Task HandleSearch()
+    {
+        await OnSearch.InvokeAsync(searchTerm);
+    }
+
+    private async Task HandleFormSubmit()
+    {
+        await OnFormSubmit.InvokeAsync(searchTerm);
+    }
+
+
+
+    private async Task ClearFilter()
+    {
+        await OnClearFilters.InvokeAsync();
+    }
+}
