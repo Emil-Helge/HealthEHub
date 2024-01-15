@@ -4,17 +4,7 @@
 <PageTitle>Exercises</PageTitle>
 
 <MudItem xs="12">
-    <ExerciseTargetMuscle TargetMuscles="@TargetMuscles" OnTargetMuscleSelected="SetSelectedTargetMuscle" />
-    <ExerciseEquipment AllEquipment="@AllEquipment" OnEquipmentSelected="SetSelectedEquipment" />
-    <ExerciseBodyPart BodyParts="@BodyParts" OnBodyPartSelected="SetSelectedBodyPart" />
-    <form @onsubmit="HandleFormSubmit">
-        <input type="search" placeholder="Search by exercise name" aria-label="Search" @bind="searchTerm">
-        <button type="submit">
-            <i></i>
-        </button>
-    </form>
-    <p>Selected Body Part: @selectedBodyPart</p>
-    <button @onclick="ClearFilter">Clear</button>
+    <FilterBar searchTerm="@searchTerm" searchTermChanged="@(value => searchTerm = value)" TargetMuscles="@TargetMuscles" OnTargetMuscleSelected="SetSelectedTargetMuscle" AllEquipment="@AllEquipment" OnEquipmentSelected="SetSelectedEquipment" BodyParts="@BodyParts" OnBodyPartSelected="SetSelectedBodyPart" OnSearch="HandleSearch" OnFormSubmit="HandleFormSubmit" OnClearFilters="ClearFilter" />
 </MudItem>
 
 <MudGrid>
@@ -42,19 +32,19 @@
 
 @code {
     private string[]? AllEquipment;
-    private string selectedEquipment = "";
+    private string selectedEquipment = string.Empty;
     private string[]? TargetMuscles;
-    private string selectedTargetMuscle = "";
+    private string selectedTargetMuscle = string.Empty;
 
     private string[]? BodyParts;
-    private string selectedBodyPart = "";
+    private string selectedBodyPart = string.Empty;
 
     private bool isSearching = false;
 
     private int countPerPage = 20;
     private int offset = 0;
     private int TotalExercises = 1300;
-    private string searchTerm = "";
+    private string searchTerm = string.Empty;
     private List<Exercise>? allExercises;
     private List<Exercise>? displayedExercises;
 
@@ -63,14 +53,14 @@
         TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
         AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
 
-        await LoadExercises(offset, countPerPage);
+        // await LoadExercises(offset, countPerPage);
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
     }
 
     private async Task SetSelectedBodyPart(string bodyPart)
     {
-        selectedEquipment = "";
-        selectedTargetMuscle = "";
+        selectedEquipment = string.Empty;
+        selectedTargetMuscle = string.Empty;
         selectedBodyPart = bodyPart;
         offset = 0;
         if (displayedExercises is not null)
@@ -82,8 +72,8 @@
 
     private async Task SetSelectedEquipment(string equipment)
     {
-        selectedBodyPart = "";
-        selectedTargetMuscle = "";
+        selectedBodyPart = string.Empty;
+        selectedTargetMuscle = string.Empty;
         selectedEquipment = equipment;
         offset = 0;
         if (displayedExercises is not null)
@@ -95,8 +85,8 @@
 
     private async Task SetSelectedTargetMuscle(string targetMuscle)
     {
-        selectedBodyPart = "";
-        selectedEquipment = "";
+        selectedBodyPart = string.Empty;
+        selectedEquipment = string.Empty;
         selectedTargetMuscle = targetMuscle;
         offset = 0;
         if (displayedExercises is not null)
@@ -154,18 +144,21 @@
     private async Task HandleSearch()
     {
         isSearching = !string.IsNullOrWhiteSpace(searchTerm);
-        offset = 0;
 
         if (isSearching)
         {
-            var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises/name/{searchTerm}?offset=0&limit={countPerPage}");
+            var response = await Http.GetFromJsonAsync<List<Exercise>>($"/exercises/name/{searchTerm}?offset={offset}&limit={countPerPage}");
             if (response is not null)
             {
-                displayedExercises = response;
-            }
-            else
-            {
-                displayedExercises.Clear();
+                if (offset == 0)
+                {
+                    displayedExercises = response;
+                }
+                else
+                {
+                    displayedExercises.AddRange(response);
+                }
+                offset += response.Count;
             }
         }
         else
@@ -174,17 +167,20 @@
         }
     }
 
-    private async Task HandleFormSubmit()
+
+    private async Task HandleFormSubmit(string searchTerm)
     {
+        this.searchTerm = searchTerm;
         await HandleSearch();
     }
 
+
     private async Task ClearFilter()
     {
-        selectedBodyPart = "";
-        selectedEquipment = "";
-        selectedTargetMuscle = "";
-        searchTerm = "";
+        selectedBodyPart = string.Empty;
+        selectedEquipment = string.Empty;
+        selectedTargetMuscle = string.Empty;
+        searchTerm = string.Empty;
         isSearching = false;
         offset = 0;
         if (displayedExercises is not null)
