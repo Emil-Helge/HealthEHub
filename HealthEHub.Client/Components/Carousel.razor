@@ -22,18 +22,18 @@
         <MudCarouselItem Color="@Color.Transparent" Transition="Transition.Custom" CustomTransitionEnter="bounceIn" CustomTransitionExit="bounceOut">
             <div class="d-flex justify-center" style="height:100%">
                 <MudStack AlignItems="AlignItems.Center">
-                    <MudText Typo="Typo.h4"> SORT </MudText>
+                    <MudText Typo="Typo.h4"> DISCOVER </MudText>
                     <MudImage Src="images/hero-bg.svg" Height="150" />
-                    <MudText Typo="Typo.overline">SORT AND BROWSE BY EQUIPMENT</MudText>
+                    <MudText Typo="Typo.overline">DISCOVER A WORLD OF FITNESS WITH OVER 1300 EXERCISES AT YOUR FINGERTIPS</MudText>
                 </MudStack>
             </div>
         </MudCarouselItem>
         <MudCarouselItem Color="@Color.Transparent" Transition="Transition.Custom" CustomTransitionEnter="bounceIn" CustomTransitionExit="bounceOut">
             <div class="d-flex justify-center" style="height:100%">
                 <MudStack AlignItems="AlignItems.Center">
-                    <MudText Typo="Typo.h4"> DISCOVER </MudText>
+                    <MudText Typo="Typo.h4"> SORT </MudText>
                     <MudImage Src="images/hero-bg.svg" Height="150" />
-                    <MudText Typo="Typo.overline">DISCOVER BODYWEIGHT EXERCISES</MudText>
+                    <MudText Typo="Typo.overline">SORT AND BROWSE EQUIPMENT TO FIND THE PERFECT WORKOUT FOR YOU</MudText>
                 </MudStack>
             </div>
         </MudCarouselItem>
@@ -42,15 +42,15 @@
                 <MudStack AlignItems="AlignItems.Center">
                     <MudText Typo="Typo.h4"> RELAX </MudText>
                     <MudImage Src="images/hero-bg.svg" Height="150" />
-                    <MudText Typo="Typo.overline">RELAX AND RECOVER WITH STRETCHING EXERCISES</MudText>
+                    <MudText Typo="Typo.overline">RELAX AND RECOVER WITH A CURATED COLLECTION OF STRETCHING EXERCISES</MudText>
                 </MudStack>
             </div>
         </MudCarouselItem>
     </MudCarousel>
-    <MudButton Href="/exercises" Variant="Variant.Outlined">Go To Exercises</MudButton>
-</MudStack>
-<MudDivider Class="my-6" />
-@code {
+    <MudButton Href="/exercises" FullWidth Color="Color.Primary" Variant="Variant.Text">Go To Exercises</MudButton>
+ </MudStack>
+ <MudDivider Class="my-6" />
+ @code {
     private string AnimationEntrance = "bounceIn";
     private string AnimationExit = "bounceOut";
 }
