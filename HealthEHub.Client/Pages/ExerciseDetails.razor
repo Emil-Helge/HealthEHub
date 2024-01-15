@@ -1,84 +1,130 @@
 ﻿@page "/exercise/{id}"
 @inject HttpClient Http
-
+@using MudBlazor
 
 @if (exercise is not null)
 {
-    <PageTitle>Details for @exercise?.Name</PageTitle>
-    <div>
-        <div>
-            <div>
-                <div>
-                    <div>
-                        <h1>@exercise.Name</h1>
-                    </div>
-                </div>
-                <div>
-                    <div>
-                        <img src="@exercise.GifUrl" alt="@exercise.Name" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <div>
-            <div>
-                <div>
-                    <h3>Instructions</h3>
-                    <ul>
+    <MudItem xs="12">
+        <MudText Typo="Typo.h3" Align="Align.Center">
+            @exercise.Name
+        </MudText>
+    </MudItem>
+    <MudItem xs="12" Class="d-flex align-center justify-center flex-wrap pa-0 pb-2">
+        <ChipPrimary ChipText="@exercise.BodyPart" />
+        <ChipPrimary ChipText="@exercise.Equipment" />
+        <ChipPrimary ChipText="@exercise.Target" />
+        @if (exercise.SecondaryMuscles is not null)
+        {
+            foreach (var muscle in exercise.SecondaryMuscles)
+            {
+                <MudChip Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">@muscle.ToUpper()</MudChip>
+            }
+        }
+    </MudItem>
+    <MudItem xs="12" md="5" Class="d-flex justify-center align-start">
+        <MudImage Fluid="true" Src="@exercise.GifUrl" Alt="@exercise.Name" Style="border-radius: 0.5rem;" />
+    </MudItem>
+    <MudItem xs="12" md="7">
+        <MudCard Class="pa-4">
+            <MudText Typo="Typo.h4" Align="Align.Center">Instructions</MudText>
+            <MudList Class="pa-0">
+
+                @* Renders a simple list of instructions for smaller screens *@
+                <MudHidden Breakpoint="Breakpoint.SmAndUp">
+                    @if (exercise.Instructions is not null)
+                    {
+                        foreach (var (instruction, index) in exercise.Instructions.Select((value, i) => (value, i)))
+                        {
+                            <MudListItem>
+                                <MudText Color="Color.Info" Typo="Typo.h6">Step @(index + 1) </MudText>
+                                <MudText Typo="Typo.body2">@instruction</MudText>
+                                </MudListItem>
+                        }
+                    }
+                </MudHidden>
+
+                @* Renders a timeline of instructions for larger screens *@
+                <MudHidden Breakpoint="Breakpoint.Xs">
+                    <MudTimeline>
                         @if (exercise.Instructions is not null)
                         {
-                            foreach (var instruction in exercise.Instructions)
+                            foreach (var (instruction, index) in exercise.Instructions.Select((value, i) => (value, i)))
                             {
-                                <li>@instruction</li>
+                                <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                                    <ItemOpposite>
+                                        <MudText Color="Color.Info" Typo="Typo.h5">
+                                            Step @(index + 1)
+                                        </MudText>
+                                    </ItemOpposite>
+                                    <ItemContent>
+                                        <MudText>
+                                            @instruction
+                                        </MudText>
+                                    </ItemContent>
+                                </MudTimelineItem>
                             }
                         }
-                    </ul>
-                </div>
-                <div>
-                    <h6>Body part:</h6>
-                    <p>@exercise.BodyPart</p>
-                    <h6>Equipment:</h6>
-                    <p>@exercise.Equipment</p>
-                    <h6>Target muscle:</h6>
-                    <p>@exercise.Target</p>
-
-                    <div>
-                        <h6>Secondary muscles:</h6>
-                        @if (exercise.SecondaryMuscles is not null)
-                        {
-                            foreach (var muscle in exercise.SecondaryMuscles)
-                            {
-                                <p>@muscle</p>
-                            }
-                        }
-                    </div>
-                </div>
-            </div>
-            <hr />
-            <h3>Video</h3>
-            @if (youtubeSearchResult?.Contents is not null)
+                    </MudTimeline>
+                </MudHidden>
+            </MudList>
+        </MudCard>
+    </MudItem>
+    <MudDivider />
+    <MudItem xs="12">
+        @if (youtubeSearchResult?.Contents is not null)
+        {
+            @foreach (var content in youtubeSearchResult.Contents.Take(1))
             {
-                @foreach (var content in youtubeSearchResult.Contents.Take(1))
-                {
-                    var video = content.Video;
-                    <div>
-                        <iframe src="https://www.youtube.com/embed/@video.VideoId" allowfullscreen alt="@video.Title"></iframe>
-                    </div>
-                    <p>Created by: @video.ChannelName</p>
-                }
+                var video = content.Video;
+                <MudCard>
+                    <MudCardContent>
+                        <iframe style="aspect-ratio: 16/9;" src="https://www.youtube.com/embed/@video.VideoId" allowfullscreen alt="@video.Title"></iframe>
+                    </MudCardContent>
+                </MudCard>
+                <MudText>Created by: @video.ChannelName</MudText>
             }
-            else
-            {
-                <p>No videos found.</p>
-            }
-        </div>
-    </div>
+        }
+        else
+        {
+            <MudText>No videos found.</MudText>
+        }
+    </MudItem>
 }
 else
 {
-    <p>Loading exercise details...</p>
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudSkeleton Width="40%" Height="92px" />
+    </MudItem>
+    <MudItem xs="12" Class="d-flex gap-3 justify-center flex-wrap pa-0 pb-2">
+        <MudSkeleton Width="10%" Height="42px" />
+        <MudSkeleton Width="10%" Height="42px" />
+        <MudSkeleton Width="10%" Height="42px" />
+        <MudSkeleton Width="10%" Height="42px" />
+    </MudItem>
+    <MudItem xs="12" md="5" Class="d-flex justify-center align-start">
+        <MudSkeleton Height="360px" Width="100%" />
+    </MudItem>
+    <MudItem xs="12" md="7">
+        <MudCard Class="pa-4 mud-height-full">
+            <MudList Class="pa-0 d-flex flex-column justify-top gap-6 mud-height-full">
+                <MudSkeleton Height="60px" />
+                <MudSkeleton Height="23px" />
+                <MudSkeleton Height="23px" />
+                <MudSkeleton Height="23px" />
+                <MudSkeleton Height="23px" />
+                <MudSkeleton Height="23px" />
+            </MudList>
+        </MudCard>
+    </MudItem>
+    <MudDivider />
+    <MudItem xs="12">
+        <MudCard>
+            <MudCardContent>
+                <MudSkeleton Height="600px" Width="100%" />
+            </MudCardContent>
+        </MudCard>
+        <MudSkeleton />
+    </MudItem>
 }
 
 @code {
