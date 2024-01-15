@@ -13,7 +13,7 @@
         @foreach (Exercise exercise in displayedExercises)
         {
             <MudItem xs="12" lg="6">
-                <ExerciseCard Exercise="exercise" />
+                <ExerciseCard exercise="exercise" />
             </MudItem>
         }
     }
@@ -53,7 +53,7 @@
         TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
         AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
 
-        // await LoadExercises(offset, countPerPage);
+        await LoadExercises(offset, countPerPage);
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
     }
 
