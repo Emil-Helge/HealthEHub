@@ -1,5 +1,7 @@
-using HealthEHub.API.Services;
+using HealthEHub.API.Data;
+using Microsoft.EntityFrameworkCore;
 using SharedModels.Models;
+using HealthEHub.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,11 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<HealthEHubContext>(options =>
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddHttpClient("ExerciseClient", client =>
 {
     client.BaseAddress = new Uri("https://exercisedb.p.rapidapi.com/");
@@ -32,7 +39,7 @@ builder.Services.AddHttpClient("YoutubeSearchClient", client =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IMockDataService, MockDataService>();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
@@ -45,21 +52,13 @@ app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
-app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+app.MapGet("/exercise/{id}", async (string id, IHttpClientFactory clientFactory) =>
 {
-    //if (app.Environment.IsDevelopment())
-    //{
-    //    var mockExercise = mockDataService.GetExerciseById(id);
-    //    return Results.Ok(mockExercise);
-    //}
-    //else
-    //{
     var client = clientFactory.CreateClient("ExerciseClient");
     var response = await client.GetAsync($"/exercises/exercise/{id}");
     return response.IsSuccessStatusCode
         ? Results.Ok(await response.Content.ReadFromJsonAsync<Exercise>())
         : Results.Problem("API call failed.");
-    //}
 })
 .WithName("GetExerciseById");
 
@@ -148,58 +147,33 @@ app.MapGet("/exercises/name/{name}", async (string name, int limit, int offset, 
     }
 }).WithName("GetExercisesByName");
 
-app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+app.MapGet("/bodyparts", async (IHttpClientFactory clientFactory) =>
 {
-    if (app.Environment.IsDevelopment())
-    {
-        var mockBodyParts = mockDataService.GetBodyParts();
-        return Results.Ok(mockBodyParts);
-    }
-    else
-    {
-        var client = clientFactory.CreateClient("ExerciseClient");
-        var response = await client.GetAsync("exercises/bodyPartList");
-        return response.IsSuccessStatusCode
-            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
-            : Results.Problem("API call failed.");
-    }
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises/bodyPartList");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+        : Results.Problem("API call failed.");
 })
 .WithName("GetBodyParts");
 
-app.MapGet("/allequipment", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+app.MapGet("/allequipment", async (IHttpClientFactory clientFactory) =>
 {
-    if (app.Environment.IsDevelopment())
-    {
-        var mockEquipment = mockDataService.GetAllEquipment();
-        return Results.Ok(mockEquipment);
-    }
-    else
-    {
-        var client = clientFactory.CreateClient("ExerciseClient");
-        var response = await client.GetAsync("exercises/equipmentList");
-        return response.IsSuccessStatusCode
-        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
-        : Results.Problem("API call failed.");
-
-    }
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises/equipmentList");
+    return response.IsSuccessStatusCode
+    ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+    : Results.Problem("API call failed.");
 })
 .WithName("GetAllEquipment");
 
-app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory, IMockDataService mockDataService) =>
+app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory) =>
 {
-    if (app.Environment.IsDevelopment())
-    {
-        var mockTargetMuscles = mockDataService.GetTargetMuscles();
-        return Results.Ok(mockTargetMuscles);
-    }
-    else
-    {
-        var client = clientFactory.CreateClient("ExerciseClient");
-        var response = await client.GetAsync("exercises/targetList");
-        return response.IsSuccessStatusCode
-            ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
-            : Results.Problem("API call failed.");
-    }
+    var client = clientFactory.CreateClient("ExerciseClient");
+    var response = await client.GetAsync("exercises/targetList");
+    return response.IsSuccessStatusCode
+        ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
+        : Results.Problem("API call failed.");
 })
 .WithName("GetTargetMuscles");
 
@@ -214,5 +188,34 @@ app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFact
         : Results.Problem("API call failed.");
 })
 .WithName("SearchYoutube");
+
+app.MapPost("/register", async (HttpContext context) =>
+{
+    var userService = context.RequestServices.GetRequiredService<UserService>();
+    var user = await context.Request.ReadFromJsonAsync<User>();
+    if (user == null)
+    {
+        return Results.BadRequest("Invalid user data.");
+    }
+    var registeredUser = await userService.Register(user.Username, user.Email, user.PasswordHash);
+    return Results.Created($"/users/{registeredUser.UserId}", registeredUser);
+}).Produces<User>(StatusCodes.Status201Created);
+
+app.MapPost("/login", async (HttpContext context) =>
+{
+    var userService = context.RequestServices.GetRequiredService<UserService>();
+    var user = await context.Request.ReadFromJsonAsync<User>();
+    if (user == null)
+    {
+        return Results.BadRequest("Invalid user data.");
+    }
+    var loggedInUser = await userService.Login(user.Username, user.PasswordHash);
+    if (loggedInUser == null)
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(loggedInUser);
+}).Produces<User>(StatusCodes.Status200OK);
 
 app.Run();

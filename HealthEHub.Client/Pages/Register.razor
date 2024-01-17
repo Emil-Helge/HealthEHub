@@ -1,0 +1,32 @@
+﻿@page "/register"
+@inject HttpClient Http
+@inject AuthenticationService AuthService
+
+<PageTitle>Register</PageTitle>
+
+<MudItem xs="12" Class="d-flex flex-column align-center">
+    <MudGrid Class="">
+        <MudItem xs="12" sm="8" Class="ml-auto mr-auto">
+            <MudForm Class="d-flex flex-column gap-4">
+                <MudTextField @bind-Value="registerRequest.Username" Label="Username" Variant="Variant.Text" />
+                <MudTextField @bind-Value="registerRequest.Email" Label="Email" Variant="Variant.Text" />
+                <MudTextField @bind-Value="registerRequest.Password" Label="Password" Variant="Variant.Text" />
+                <MudButton OnClick="RegisterUser" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+                <MudText Typo="Typo.subtitle2" Class="mr-auto ml-auto">
+                    Already have an account?
+                    <MudLink Href="/login">Log In</MudLink>
+                </MudText>
+            </MudForm>
+        </MudItem>
+    </MudGrid>
+</MudItem>
+
+
+@code {
+    private RegisterRequest registerRequest = new RegisterRequest();
+
+    private async Task RegisterUser()
+    {
+        await AuthService.Register(registerRequest);
+    }
+}

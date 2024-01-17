@@ -1,4 +1,6 @@
-﻿<MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" IconColor="Color.Primary" Match="NavLinkMatch.All" Class="gap-1">
+﻿@inject AuthenticationService AuthService
+
+<MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" IconColor="Color.Primary" Match="NavLinkMatch.All" Class="gap-1">
     <MudText Color="Color.Primary">
         Home
     </MudText>
@@ -19,6 +21,39 @@
     </MudText>
 </MudNavLink>
 
-@code {
-
+@if (AuthService.IsLoggedIn)
+{
+    <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Primary" Match="NavLinkMatch.All">
+        <MudText Color="Color.Primary">
+            Profile
+        </MudText>
+    </MudNavLink>
 }
+else
+{
+    <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login" IconColor="Color.Primary" Match="NavLinkMatch.All">
+        <MudText Color="Color.Primary">
+            Log In
+        </MudText>
+    </MudNavLink>
+}
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.OnLoginStateChanged += StateHasChanged;
+    }
+
+    // Unsubscribe from the event when the component is disposed to prevent memory leaks
+    public void Dispose()
+    {
+        AuthService.OnLoginStateChanged -= StateHasChanged;
+    }
+
+    private void Logout()
+    {
+        AuthService.Logout();
+    }
+}
+

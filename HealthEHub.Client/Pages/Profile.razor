@@ -1,0 +1,24 @@
+﻿@page "/profile"
+@inject AuthenticationService AuthService
+@inject NavigationManager NavigationManager
+
+<MudItem xs="12">
+    <MudButton OnClick="Logout" Color="Color.Primary">
+        Log out
+    </MudButton>
+</MudItem>
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (!AuthService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+
+    private void Logout()
+    {
+        AuthService.Logout();
+    }
+}

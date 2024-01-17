@@ -1,0 +1,30 @@
+﻿@page "/login"
+@inject AuthenticationService AuthenticationService
+
+<PageTitle>Log In</PageTitle>
+
+<MudItem xs="12" Class="d-flex flex-column align-center">
+    <MudGrid Class="">
+        <MudItem xs="12" sm="8" Class="ml-auto mr-auto">
+            <MudForm Class="d-flex flex-column gap-4">
+                <MudTextField @bind-Value="loginRequest.Username" Label="Username" Variant="Variant.Text" />
+                <MudTextField @bind-Value="loginRequest.Password" Label="Password" Variant="Variant.Text" />
+                @* TODO: add remember me & forgot password *@
+                <MudButton FullWidth OnClick="LoginUser" Variant="Variant.Filled" Color="Color.Primary">Log In</MudButton>
+                 <MudText Typo="Typo.subtitle2" Class="mr-auto ml-auto">
+                     Don't have an account?
+                     <MudLink Href="/register">Register</MudLink>
+                 </MudText>
+             </MudForm>
+         </MudItem>
+     </MudGrid>
+ </MudItem>
+
+ @code {
+    private LoginRequest loginRequest = new LoginRequest();
+
+    private async Task LoginUser()
+    {
+        await AuthenticationService.Login(loginRequest);
+    }
+}
