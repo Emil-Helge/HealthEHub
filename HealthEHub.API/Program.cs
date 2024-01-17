@@ -1,6 +1,7 @@
 using HealthEHub.API.Data;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Models;
+using HealthEHub.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ builder.Services.AddHttpClient("YoutubeSearchClient", client =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 
@@ -186,5 +188,34 @@ app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFact
         : Results.Problem("API call failed.");
 })
 .WithName("SearchYoutube");
+
+app.MapPost("/register", async (HttpContext context) =>
+{
+    var userService = context.RequestServices.GetRequiredService<UserService>();
+    var user = await context.Request.ReadFromJsonAsync<User>();
+    if (user == null)
+    {
+        return Results.BadRequest("Invalid user data.");
+    }
+    var registeredUser = await userService.Register(user.Username, user.Email, user.PasswordHash);
+    return Results.Created($"/users/{registeredUser.UserId}", registeredUser);
+}).Produces<User>(StatusCodes.Status201Created);
+
+app.MapPost("/login", async (HttpContext context) =>
+{
+    var userService = context.RequestServices.GetRequiredService<UserService>();
+    var user = await context.Request.ReadFromJsonAsync<User>();
+    if (user == null)
+    {
+        return Results.BadRequest("Invalid user data.");
+    }
+    var loggedInUser = await userService.Login(user.Username, user.PasswordHash);
+    if (loggedInUser == null)
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(loggedInUser);
+}).Produces<User>(StatusCodes.Status200OK);
 
 app.Run();
