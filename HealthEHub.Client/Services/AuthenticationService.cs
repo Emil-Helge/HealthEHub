@@ -20,7 +20,7 @@ namespace HealthEHub.Client.Services
             }
             else
             {
-                //TODO: Handle error
+                throw new HttpRequestException("Registration failed");
             }
         }
 
