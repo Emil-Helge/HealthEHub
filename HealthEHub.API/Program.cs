@@ -1,7 +1,9 @@
 using HealthEHub.API.Data;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Models;
-using HealthEHub.API.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<HealthEHubContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<HealthEHubContext>();
+
 builder.Services.AddHttpClient("ExerciseClient", client =>
 {
     client.BaseAddress = new Uri("https://exercisedb.p.rapidapi.com/");
@@ -38,8 +44,17 @@ builder.Services.AddHttpClient("YoutubeSearchClient", client =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 
 var app = builder.Build();
 
@@ -47,6 +62,8 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.MapIdentityApi<IdentityUser>();
 
 app.UseCors("CorsPolicy");
 
@@ -175,7 +192,7 @@ app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory) =>
         ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
         : Results.Problem("API call failed.");
 })
-.WithName("GetTargetMuscles");
+.WithName("GetTargetMuscles").RequireAuthorization();
 
 app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFactory) =>
 {
@@ -188,34 +205,5 @@ app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFact
         : Results.Problem("API call failed.");
 })
 .WithName("SearchYoutube");
-
-app.MapPost("/register", async (HttpContext context) =>
-{
-    var userService = context.RequestServices.GetRequiredService<UserService>();
-    var user = await context.Request.ReadFromJsonAsync<User>();
-    if (user == null)
-    {
-        return Results.BadRequest("Invalid user data.");
-    }
-    var registeredUser = await userService.Register(user.Username, user.Email, user.PasswordHash);
-    return Results.Created($"/users/{registeredUser.UserId}", registeredUser);
-}).Produces<User>(StatusCodes.Status201Created);
-
-app.MapPost("/login", async (HttpContext context) =>
-{
-    var userService = context.RequestServices.GetRequiredService<UserService>();
-    var user = await context.Request.ReadFromJsonAsync<User>();
-    if (user == null)
-    {
-        return Results.BadRequest("Invalid user data.");
-    }
-    var loggedInUser = await userService.Login(user.Username, user.PasswordHash);
-    if (loggedInUser == null)
-    {
-        return Results.Unauthorized();
-    }
-
-    return Results.Ok(loggedInUser);
-}).Produces<User>(StatusCodes.Status200OK);
 
 app.Run();
