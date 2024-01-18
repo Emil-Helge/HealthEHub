@@ -1,9 +1,11 @@
 ﻿@using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 
+
 @page "/register"
 @inject HttpClient Http
 @inject AuthenticationService AuthService
+@inject ISnackbar Snackbar
 
 <PageTitle>Register</PageTitle>
 
@@ -13,8 +15,8 @@
 
     .bounceIn {
         opacity: 0;
-        animation-delay: 0;
-        animation-duration: 0.8s;
+        animation-delay: 0.01s;
+        animation-duration: 1s;
         animation-name: bounceIn;
         animation-fill-mode: forwards;
     }
@@ -25,10 +27,26 @@
     <MudGrid Justify="Justify.Center">
         <MudItem xs="12" sm="8">
             <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" Class="d-flex flex-column gap-4">
-                <MudTextField @bind-Value="registerRequest.Email" T="string" Label="Email" Required="true" RequiredError="Email is required!" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" />
-                <MudTextField @bind-Value="registerRequest.Password" T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1" InputType="InputType.Password" Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true" RequiredError="Password is required!" />
-                <MudTextField T="string" Label="Password" HelperText="Repeat the password" InputType="InputType.Password" Validation="@(new Func<string, string>(PasswordMatch))" />
-                <MudButton OnClick="RegisterUser" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)">Register</MudButton>
+                <MudTextField @bind-Value="registerRequest.Email" OnlyValidateIfDirty="true" T="string" Label="Email" Required="true" RequiredError="Email is required" Validation="@(new Func<string, IEnumerable<string>>(EmailValidation))" />
+                <MudTextField @bind-Value="registerRequest.Password" OnlyValidateIfDirty="true" T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1" InputType="@PasswordInput" Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true" RequiredError="Password is required" />
+                <MudTextField Immediate T="string" Label="Password" HelperText="Repeat the password" InputType="@PasswordInput" Validation="@(new Func<string, string>(PasswordMatch))" Required="true" RequiredError="Repeated password is required" />
+                 <MudButton Class="mr-auto rounded" Variant="Variant.Text" OnClick="TogglePasswordVisibility">
+                     <MudIcon Color="Color.Primary" Class="mr-1" Size="Size.Small" Icon="@PasswordInputIcon" />
+                     <MudText Typo="Typo.caption">
+                         Toggle Password Visibility
+                     </MudText>
+                 </MudButton>
+                 <MudButton OnClick="HandleRegisterClick" Variant="Variant.Filled" Color="Color.Primary" Disabled="@isLoading">
+                     @if (isLoading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="pl-3" Typo="Typo.button">Processing registration...</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.button">Register</MudText>
+                    }
+                </MudButton>
                 <MudText Typo="Typo.subtitle2" Class="mr-auto ml-auto">
                     Already have an account?
                     <MudLink Href="/login">Log In</MudLink>
@@ -37,19 +55,19 @@
         </MudItem>
         <MudItem xs="12" sm="8">
             <MudItem Class="pb-2 d-flex gap-1 flex-wrap justify-center">
-                <MudButton Class="w-max" Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>form.Validate())">Validate</MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Error" DisableElevation="true" OnClick="@(()=>form.ResetAsync())">Reset</MudButton>
+                <MudButton Class="w-max" Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="HandleValidateClick">Validate</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" DisableElevation="true" OnClick="HandleResetClick">Reset</MudButton>
             </MudItem>
-            @if (errors.Any())
+            @if (hasClickedValidate)
             {
-                <MudPaper Elevation="1" Class="bounceIn" Rounded="true">
-                    <MudText GutterBottom Align="Align.Center" Typo="Typo.h6">Errors</MudText>
-                     <MudDivider />
-                     <MudList DisablePadding>
+                <MudPaper Class="bounceIn" Elevation="1" Rounded="true">
+                    <MudList DisablePadding>
                      @for (var i = 0; i < errors.Length; i++)
                         {
                             var error = errors[i];
-                            <MudListItem IconColor="Color.Error" Icon="@Icons.Material.Filled.Error" Text="@error" />
+                            <MudListItem IconColor="Color.Error" Icon="@Icons.Material.Filled.Error">
+                                <MudText Typo="Typo.body2">@error</MudText>
+                                </MudListItem>
                             if (i < errors.Length - 1)
                             {
                                 <MudDivider />
@@ -63,6 +81,18 @@
 </MudItem>
 
 @code {
+    private bool hasClickedValidate = false;
+    private bool isLoading = false;
+    bool success;
+    string[] errors = { };
+    public string Password { get; set; } = "superstrong123";
+
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    MudTextField<string> pwField1;
+    MudForm form;
+
     private RegisterRequest registerRequest = new RegisterRequest();
 
     private async Task RegisterUser()
@@ -70,16 +100,85 @@
         await AuthService.Register(registerRequest);
     }
 
-    bool success;
-    string[] errors = { };
-    MudTextField<string> pwField1;
-    MudForm form;
+    private async Task HandleValidateClick()
+    {
+        hasClickedValidate = true;
+        await form.Validate();
+    }
+
+    private async Task HandleRegisterClick()
+    {
+        hasClickedValidate = true;
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        var delayTask = Task.Delay(200);
+        var registerTask = RegisterUser();
+
+        if (await Task.WhenAny(delayTask, registerTask) == delayTask)
+        {
+            isLoading = true;
+            StateHasChanged();
+        }
+
+        try
+        {
+            await registerTask;
+        }
+        catch
+        {
+            Snackbar.Add("Registration failed. Please try again with different credentials.", Severity.Error);
+        }
+
+        isLoading = false;
+    }
+
+
+    private void HandleResetClick()
+    {
+        hasClickedValidate = false;
+        form.ResetAsync();
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        if (PasswordInput == InputType.Password)
+        {
+            PasswordInput = InputType.Text;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+        }
+        else
+        {
+            PasswordInput = InputType.Password;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+        }
+    }
+
+    private IEnumerable<string> EmailValidation(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            yield return "Email is required";
+        }
+        else
+        {
+            var emailAttribute = new EmailAddressAttribute();
+            if (!emailAttribute.IsValid(email))
+            {
+                yield return "The email address is invalid";
+            }
+        }
+    }
+
 
     private IEnumerable<string> PasswordStrength(string pw)
     {
         if (string.IsNullOrWhiteSpace(pw))
         {
-            yield return "Password is required!";
+            yield return "Password is required";
             yield break;
         }
         if (pw.Length < 6)
