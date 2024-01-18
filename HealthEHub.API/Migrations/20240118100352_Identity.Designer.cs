@@ -4,6 +4,7 @@ using HealthEHub.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthEHub.API.Migrations
 {
     [DbContext(typeof(HealthEHubContext))]
-    partial class HealthEHubContextModelSnapshot : ModelSnapshot
+    [Migration("20240118100352_Identity")]
+    partial class Identity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,6 +266,35 @@ namespace HealthEHub.API.Migrations
                     b.ToTable("Exercises");
                 });
 
+            modelBuilder.Entity("SharedModels.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("SharedModels.Models.WorkoutPlan", b =>
                 {
                     b.Property<int>("WorkoutPlanId")
@@ -275,11 +307,12 @@ namespace HealthEHub.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("WorkoutPlanId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("WorkoutPlans");
                 });
@@ -340,6 +373,22 @@ namespace HealthEHub.API.Migrations
                     b.HasOne("SharedModels.Models.WorkoutPlan", null)
                         .WithMany("Exercises")
                         .HasForeignKey("WorkoutPlanId");
+                });
+
+            modelBuilder.Entity("SharedModels.Models.WorkoutPlan", b =>
+                {
+                    b.HasOne("SharedModels.Models.User", "User")
+                        .WithMany("WorkoutPlans")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SharedModels.Models.User", b =>
+                {
+                    b.Navigation("WorkoutPlans");
                 });
 
             modelBuilder.Entity("SharedModels.Models.WorkoutPlan", b =>
