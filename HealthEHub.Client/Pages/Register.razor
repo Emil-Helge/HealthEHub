@@ -1,26 +1,66 @@
-﻿@page "/register"
+﻿@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+@page "/register"
 @inject HttpClient Http
 @inject AuthenticationService AuthService
 
 <PageTitle>Register</PageTitle>
 
+@*Keyframes by https://animate.style/*@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<style type="text/css">
+
+    .bounceIn {
+        opacity: 0;
+        animation-delay: 0;
+        animation-duration: 0.8s;
+        animation-name: bounceIn;
+        animation-fill-mode: forwards;
+    }
+
+</style>
+
 <MudItem xs="12" Class="d-flex flex-column align-center">
-    <MudGrid Class="">
-        <MudItem xs="12" sm="8" Class="ml-auto mr-auto">
-            <MudForm Class="d-flex flex-column gap-4">
-                <MudTextField @bind-Value="registerRequest.Username" Label="Username" Variant="Variant.Text" />
-                <MudTextField @bind-Value="registerRequest.Email" Label="Email" Variant="Variant.Text" />
-                <MudTextField @bind-Value="registerRequest.Password" Label="Password" Variant="Variant.Text" />
-                <MudButton OnClick="RegisterUser" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12" sm="8">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" Class="d-flex flex-column gap-4">
+                <MudTextField @bind-Value="registerRequest.Email" T="string" Label="Email" Required="true" RequiredError="Email is required!" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" />
+                <MudTextField @bind-Value="registerRequest.Password" T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1" InputType="InputType.Password" Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true" RequiredError="Password is required!" />
+                <MudTextField T="string" Label="Password" HelperText="Repeat the password" InputType="InputType.Password" Validation="@(new Func<string, string>(PasswordMatch))" />
+                <MudButton OnClick="RegisterUser" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)">Register</MudButton>
                 <MudText Typo="Typo.subtitle2" Class="mr-auto ml-auto">
                     Already have an account?
                     <MudLink Href="/login">Log In</MudLink>
                 </MudText>
             </MudForm>
         </MudItem>
+        <MudItem xs="12" sm="8">
+            <MudItem Class="pb-2 d-flex gap-1 flex-wrap justify-center">
+                <MudButton Class="w-max" Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>form.Validate())">Validate</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" DisableElevation="true" OnClick="@(()=>form.ResetAsync())">Reset</MudButton>
+            </MudItem>
+            @if (errors.Any())
+            {
+                <MudPaper Elevation="1" Class="bounceIn" Rounded="true">
+                    <MudText GutterBottom Align="Align.Center" Typo="Typo.h6">Errors</MudText>
+                     <MudDivider />
+                     <MudList DisablePadding>
+                     @for (var i = 0; i < errors.Length; i++)
+                        {
+                            var error = errors[i];
+                            <MudListItem IconColor="Color.Error" Icon="@Icons.Material.Filled.Error" Text="@error" />
+                            if (i < errors.Length - 1)
+                            {
+                                <MudDivider />
+                            }
+                        }
+                    </MudList>
+                </MudPaper>
+            }
+        </MudItem>
     </MudGrid>
 </MudItem>
-
 
 @code {
     private RegisterRequest registerRequest = new RegisterRequest();
@@ -28,5 +68,37 @@
     private async Task RegisterUser()
     {
         await AuthService.Register(registerRequest);
+    }
+
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 6)
+            yield return "Password must be at least of length 6";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+        if (!Regex.IsMatch(pw, @"\W"))
+            yield return "Password must contain at least one non alphanumeric character";
+    }
+
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "Passwords don't match";
+        return null;
     }
 }
