@@ -4,8 +4,9 @@ using SharedModels.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
-
+using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddCors(options =>
 {
@@ -66,6 +67,8 @@ app.UseSwaggerUI();
 app.MapIdentityApi<IdentityUser>();
 
 app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
@@ -205,5 +208,81 @@ app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFact
         : Results.Problem("API call failed.");
 })
 .WithName("SearchYoutube");
+
+app.MapPost("/workoutplan", async (WorkoutPlan workoutPlan, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    workoutPlan.UserId = userId;
+
+    await context.WorkoutPlans.AddAsync(workoutPlan);
+    await context.SaveChangesAsync();
+
+    return Results.Created($"/workoutplan/{workoutPlan.WorkoutPlanId}", workoutPlan);
+})
+ .WithName("CreateWorkoutPlan").RequireAuthorization();
+
+app.MapDelete("/workoutplan/{id}", async (int id, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    var workoutPlan = await context.WorkoutPlans.FindAsync(id);
+    if (workoutPlan == null || workoutPlan.UserId != userId)
+    {
+        return Results.NotFound("Workout plan not found or user mismatch.");
+    }
+
+    context.WorkoutPlans.Remove(workoutPlan);
+    await context.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.WithName("DeleteWorkoutPlan").RequireAuthorization();
+
+app.MapGet("/workoutplan/{id}", async (int id, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    var workoutPlan = await context.WorkoutPlans
+                                   .Include(wp => wp.Exercises)
+                                   .FirstOrDefaultAsync(wp => wp.WorkoutPlanId == id && wp.UserId == userId);
+
+    if (workoutPlan == null)
+    {
+        return Results.NotFound("Workout plan not found.");
+    }
+
+    return Results.Ok(workoutPlan);
+})
+.WithName("GetWorkoutPlanById").RequireAuthorization();
+
+
+app.MapGet("/workoutplans", async (HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    var workoutPlans = await context.WorkoutPlans
+        .Where(wp => wp.UserId == userId)
+        .ToListAsync();
+
+    return Results.Ok(workoutPlans);
+})
+.WithName("GetAllWorkoutPlans").RequireAuthorization();
 
 app.Run();
