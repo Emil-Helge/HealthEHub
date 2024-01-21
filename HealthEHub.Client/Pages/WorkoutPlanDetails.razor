@@ -1,0 +1,40 @@
+﻿@page "/workoutplan/{WorkoutPlanId}"
+@inject HttpClient Http
+
+<PageTitle>@(workoutPlan?.Name ?? "Loading Workout Plan...")</PageTitle>
+
+<MudItem xs="12">
+    <MudText Typo="Typo.h4" Align="Align.Center">
+        Workout Plan: @workoutPlan?.Name
+    </MudText>
+</MudItem>
+
+<MudItem xs="12">
+    @if (workoutPlan == null)
+    {
+        <MudStack Row Spacing="3">
+             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+             <MudText Typo="Typo.body1">
+                 Loading plan...
+             </MudText>
+         </MudStack>
+
+    }
+    else if (workoutPlan.Exercises.Count == 0)
+    {
+        <MudText Typo="Typo.body1" Class="pa-4" Align="Align.Center">No exercises found in this workout plan. Please add some exercises</MudText>
+    }
+    else
+    {
+        // TODO: render exercises
+    }
+</MudItem>
+@code {
+    [Parameter] public string? WorkoutPlanId { get; set; }
+    private WorkoutPlan? workoutPlan;
+
+    protected override async Task OnInitializedAsync()
+    {
+        workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+    }
+}
