@@ -1,6 +1,7 @@
 ﻿@page "/exercise/{id}"
 @inject HttpClient Http
-@using MudBlazor
+
+<PageTitle>@(exercise?.Name ?? "Loading Exercise Details...")</PageTitle>
 
 @if (exercise is not null)
 {
@@ -23,6 +24,7 @@
     </MudItem>
     <MudItem xs="12" md="5" Class="d-flex justify-center align-start">
         <MudImage Fluid="true" Src="@exercise.GifUrl" Alt="@exercise.Name" Style="border-radius: 0.5rem;" />
+        <AddToProfileButton Exercise="exercise" />
     </MudItem>
     <MudItem xs="12" md="7">
         <MudCard Class="pa-4">

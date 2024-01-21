@@ -45,7 +45,6 @@ else
         AuthService.OnLoginStateChanged += StateHasChanged;
     }
 
-    // Unsubscribe from the event when the component is disposed to prevent memory leaks
     public void Dispose()
     {
         AuthService.OnLoginStateChanged -= StateHasChanged;
