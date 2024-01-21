@@ -5,7 +5,7 @@ namespace SharedModels.Models
     {
         public int WorkoutPlanId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public List<Exercise> Exercises { get; set; } = [];
         public string UserId { get; set; } = string.Empty;
+        public virtual ICollection<SavedExercise> Exercises { get; set; } = new List<SavedExercise>();
     }
 }
