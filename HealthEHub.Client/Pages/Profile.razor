@@ -1,24 +1,156 @@
 ﻿@page "/profile"
-@inject AuthenticationService AuthService
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject AuthenticationService AuthService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
-<MudItem xs="12">
-    <MudButton OnClick="Logout" Color="Color.Primary">
-        Log out
-    </MudButton>
+<PageTitle>Profile</PageTitle>
+
+
+<MudItem xs="10" md="7" Class="mr-auto ml-auto">
+    <MudText Typo="Typo.h5" GutterBottom="true">Your Workout Plans</MudText>
+    @if (workoutPlans == null)
+    {
+        <MudStack Row Spacing="3">
+             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+             <MudText Typo="Typo.body1">
+                 Loading plans...
+             </MudText>
+         </MudStack>
+
+    }
+    else if (workoutPlans.Count == 0)
+    {
+        <MudText Typo="Typo.body1" Class="pa-4" Align="Align.Center">No plans found. Please create one</MudText>
+    }
+    else
+    {
+        <MudList>
+            @foreach (var plan in workoutPlans)
+            {
+                <MudListItem>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="flex-wrap">
+                         <MudText Color="Color.Primary" Typo="Typo.body1">
+                             @plan.Name
+                        </MudText>
+                        <MudStack Row Spacing="2" Class="flex-wrap" Justify="Justify.Center">
+                             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => GoToWorkoutPlan(plan.WorkoutPlanId))">
+                                 <MudText Typo="Typo.button">Go to plan</MudText>
+                             </MudButton>
+                             <MudButton OnClick="@(() => ConfirmDeleteWorkoutPlan(plan.WorkoutPlanId, plan.Name))" Color="Color.Error">Delete</MudButton>
+                         </MudStack>
+                         <MudDivider Class="py-0" />
+                     </MudStack>
+                 </MudListItem>
+            }
+        </MudList>
+    }
 </MudItem>
 
+<MudItem xs="10" md="4" Class="mr-auto ml-auto">
+    <MudCard Class="pa-4">
+        <MudText Align="Align.Center" Typo="Typo.h5" GutterBottom="true">Create Workout Plan</MudText>
+        <MudForm @ref="form" Model="newWorkoutPlan" Class="d-flex flex-column justify-center gap-2">
+            <MudTextField T="string" Label="Workout Plan Name" @bind-Value="newWorkoutPlan.Name" Required="true" RequiredError="Name is required" />
+            <MudButton OnClick="CreateWorkoutPlan" Color="Color.Primary">Create Plan</MudButton>
+        </MudForm>
+    </MudCard>
+</MudItem>
+<MudItem xs="12" Class="d-flex flex-column justify-center mt-auto">
+    <MudDivider Class="mb-2" />
+    <MudButton OnClick="Logout" Color="Color.Primary">Log out</MudButton>
+</MudItem>
 @code {
-    protected override void OnInitialized()
+    private List<WorkoutPlan>? workoutPlans;
+    private WorkoutPlan newWorkoutPlan = new WorkoutPlan();
+    private MudForm form;
+
+    protected override async Task OnInitializedAsync()
     {
         if (!AuthService.IsLoggedIn)
         {
             NavigationManager.NavigateTo("/login");
         }
+        else
+        {
+            workoutPlans = await FetchWorkoutPlans();
+        }
     }
 
-    private void Logout()
+
+    private async Task<List<WorkoutPlan>> FetchWorkoutPlans()
     {
-        AuthService.Logout();
+        var response = await Http.GetFromJsonAsync<List<WorkoutPlan>>("/workoutplans");
+        return response ?? new List<WorkoutPlan>();
     }
+
+    private void GoToWorkoutPlan(int workoutPlanId)
+    {
+        NavigationManager.NavigateTo($"/workoutplan/{workoutPlanId}");
+    }
+
+    private async Task CreateWorkoutPlan()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        var response = await Http.PostAsJsonAsync("/workoutplan", newWorkoutPlan);
+        if (response.IsSuccessStatusCode)
+        {
+            var createdWorkoutPlan = await response.Content.ReadFromJsonAsync<WorkoutPlan>();
+
+            workoutPlans = await FetchWorkoutPlans();
+            newWorkoutPlan = new WorkoutPlan();
+            form?.ResetAsync();
+            StateHasChanged();
+        }
+        else
+        {
+            Snackbar.Add("Failed to create the workout plan. Please try again.", Severity.Error);
+        }
+    }
+
+    private async Task DeleteWorkoutPlan(int workoutPlanId)
+    {
+        var response = await Http.DeleteAsync($"/workoutplan/{workoutPlanId}");
+        if (response.IsSuccessStatusCode)
+        {
+            workoutPlans = workoutPlans?.Where(wp => wp.WorkoutPlanId != workoutPlanId).ToList();
+            StateHasChanged();
+        }
+        else
+        {
+            Snackbar.Add("Failed to delete the workout plan. Please try again.", Severity.Error);
+        }
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+    }
+
+    private async Task ConfirmDeleteWorkoutPlan(int workoutPlanId, string planName)
+    {
+        var parameters = new DialogParameters
+            {
+                ["ContentText"] = $"Are you sure you want to delete the workout plan '{planName}'?",
+                ["ButtonText"] = "Delete",
+                ["Color"] = Color.Error
+            };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<Dialog>("Delete Confirmation", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await DeleteWorkoutPlan(workoutPlanId);
+        }
+    }
+
+
 }
