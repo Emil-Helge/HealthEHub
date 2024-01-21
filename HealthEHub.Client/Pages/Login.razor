@@ -1,30 +1,110 @@
-﻿@page "/login"
+﻿@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@page "/login"
 @inject AuthenticationService AuthenticationService
+@inject ISnackbar Snackbar
+
 
 <PageTitle>Log In</PageTitle>
 
 <MudItem xs="12" Class="d-flex flex-column align-center">
     <MudGrid Class="">
         <MudItem xs="12" sm="8" Class="ml-auto mr-auto">
-            <MudForm Class="d-flex flex-column gap-4">
-                <MudTextField @bind-Value="loginRequest.Username" Label="Username" Variant="Variant.Text" />
-                <MudTextField @bind-Value="loginRequest.Password" Label="Password" Variant="Variant.Text" />
-                @* TODO: add remember me & forgot password *@
-                <MudButton FullWidth OnClick="LoginUser" Variant="Variant.Filled" Color="Color.Primary">Log In</MudButton>
-                 <MudText Typo="Typo.subtitle2" Class="mr-auto ml-auto">
-                     Don't have an account?
-                     <MudLink Href="/register">Register</MudLink>
-                 </MudText>
-             </MudForm>
-         </MudItem>
-     </MudGrid>
- </MudItem>
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors" Class="d-flex flex-column gap-4">
+                <MudTextField @bind-Value="loginRequest.Email" OnlyValidateIfDirty="true" Label="Email" Variant="Variant.Text" Required="true" RequiredError="Email is required" Validation="@(new Func<string, IEnumerable<string>>(EmailValidation))" />
+                <MudTextField @bind-Value="loginRequest.Password" InputType="@PasswordInput" OnlyValidateIfDirty="true" Label="Password" Variant="Variant.Text" Required="true" RequiredError="Password is required" />
+                <MudButton Class="mr-auto rounded" Variant="Variant.Text" OnClick="TogglePasswordVisibility">
+                    <MudIcon Color="Color.Primary" Class="mr-1" Size="Size.Small" Icon="@PasswordInputIcon" />
+                    <MudText Typo="Typo.caption">
+                        Toggle Password Visibility
+                    </MudText>
+                </MudButton>
+                <MudButton OnClick="HandleLogin" Variant="Variant.Filled" Color="Color.Primary" Disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="pl-3" Typo="Typo.button">Logging In...</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.button">Log In</MudText>
+                    }
+                </MudButton>
+            </MudForm>
+            <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="pt-4">
+                Don't have an account?
+                <MudLink Href="/register">Register</MudLink>
+            </MudText>
+        </MudItem>
+    </MudGrid>
+</MudItem>
 
- @code {
+@code {
+    private bool isLoading = false;
+    bool success;
+    string[] errors = { };
+    MudForm form;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
     private LoginRequest loginRequest = new LoginRequest();
 
-    private async Task LoginUser()
+    private async Task HandleLogin()
     {
-        await AuthenticationService.Login(loginRequest);
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        var delayTask = Task.Delay(200);
+        var registerTask = AuthenticationService.Login(loginRequest);
+
+        if (await Task.WhenAny(delayTask, registerTask) == delayTask)
+        {
+            isLoading = true;
+            StateHasChanged();
+        }
+
+        try
+        {
+            await registerTask;
+        }
+        catch
+        {
+            Snackbar.Add("Login failed. Please try again with different credentials.", Severity.Error);
+        }
+
+        isLoading = false;
+    }
+
+    private IEnumerable<string> EmailValidation(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            yield return "Email is required";
+        }
+        else
+        {
+            var emailAttribute = new EmailAddressAttribute();
+            if (!emailAttribute.IsValid(email))
+            {
+                yield return "The email address is invalid";
+            }
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        if (PasswordInput == InputType.Password)
+        {
+            PasswordInput = InputType.Text;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+        }
+        else
+        {
+            PasswordInput = InputType.Password;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+        }
     }
 }

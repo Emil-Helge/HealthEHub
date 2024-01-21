@@ -1,9 +1,12 @@
 using HealthEHub.API.Data;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Models;
-using HealthEHub.API.Services;
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddCors(options =>
 {
@@ -20,6 +23,10 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<HealthEHubContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<HealthEHubContext>();
 
 builder.Services.AddHttpClient("ExerciseClient", client =>
 {
@@ -38,8 +45,17 @@ builder.Services.AddHttpClient("YoutubeSearchClient", client =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 
 var app = builder.Build();
 
@@ -48,7 +64,11 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.MapIdentityApi<IdentityUser>();
+
 app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
@@ -175,7 +195,7 @@ app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory) =>
         ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
         : Results.Problem("API call failed.");
 })
-.WithName("GetTargetMuscles");
+.WithName("GetTargetMuscles").RequireAuthorization();
 
 app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFactory) =>
 {
@@ -189,33 +209,80 @@ app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFact
 })
 .WithName("SearchYoutube");
 
-app.MapPost("/register", async (HttpContext context) =>
+app.MapPost("/workoutplan", async (WorkoutPlan workoutPlan, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
 {
-    var userService = context.RequestServices.GetRequiredService<UserService>();
-    var user = await context.Request.ReadFromJsonAsync<User>();
-    if (user == null)
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
     {
-        return Results.BadRequest("Invalid user data.");
-    }
-    var registeredUser = await userService.Register(user.Username, user.Email, user.PasswordHash);
-    return Results.Created($"/users/{registeredUser.UserId}", registeredUser);
-}).Produces<User>(StatusCodes.Status201Created);
-
-app.MapPost("/login", async (HttpContext context) =>
-{
-    var userService = context.RequestServices.GetRequiredService<UserService>();
-    var user = await context.Request.ReadFromJsonAsync<User>();
-    if (user == null)
-    {
-        return Results.BadRequest("Invalid user data.");
-    }
-    var loggedInUser = await userService.Login(user.Username, user.PasswordHash);
-    if (loggedInUser == null)
-    {
-        return Results.Unauthorized();
+        return Results.Problem("User is not authenticated.");
     }
 
-    return Results.Ok(loggedInUser);
-}).Produces<User>(StatusCodes.Status200OK);
+    workoutPlan.UserId = userId;
+
+    await context.WorkoutPlans.AddAsync(workoutPlan);
+    await context.SaveChangesAsync();
+
+    return Results.Created($"/workoutplan/{workoutPlan.WorkoutPlanId}", workoutPlan);
+})
+ .WithName("CreateWorkoutPlan").RequireAuthorization();
+
+app.MapDelete("/workoutplan/{id}", async (int id, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    var workoutPlan = await context.WorkoutPlans.FindAsync(id);
+    if (workoutPlan == null || workoutPlan.UserId != userId)
+    {
+        return Results.NotFound("Workout plan not found or user mismatch.");
+    }
+
+    context.WorkoutPlans.Remove(workoutPlan);
+    await context.SaveChangesAsync();
+
+    return Results.Ok();
+})
+.WithName("DeleteWorkoutPlan").RequireAuthorization();
+
+app.MapGet("/workoutplan/{id}", async (int id, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    var workoutPlan = await context.WorkoutPlans
+                                   .Include(wp => wp.Exercises)
+                                   .FirstOrDefaultAsync(wp => wp.WorkoutPlanId == id && wp.UserId == userId);
+
+    if (workoutPlan == null)
+    {
+        return Results.NotFound("Workout plan not found.");
+    }
+
+    return Results.Ok(workoutPlan);
+})
+.WithName("GetWorkoutPlanById").RequireAuthorization();
+
+
+app.MapGet("/workoutplans", async (HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
+{
+    var userId = userManager.GetUserId(user);
+    if (userId == null)
+    {
+        return Results.Problem("User is not authenticated.");
+    }
+
+    var workoutPlans = await context.WorkoutPlans
+        .Where(wp => wp.UserId == userId)
+        .ToListAsync();
+
+    return Results.Ok(workoutPlans);
+})
+.WithName("GetAllWorkoutPlans").RequireAuthorization();
 
 app.Run();

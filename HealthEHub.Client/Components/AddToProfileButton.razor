@@ -1,0 +1,25 @@
+﻿@inject HttpClient Http
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddExerciseToProfile">Add to Profile</MudButton>
+
+@code {
+    [Parameter]
+    public Exercise? Exercise { get; set; }
+
+    private async Task AddExerciseToProfile()
+    {
+        if (Exercise != null)
+        {
+            var response = await Http.PostAsJsonAsync("/workoutplan/addExercise", Exercise);
+            if (response.IsSuccessStatusCode)
+            {
+                // Handle success
+            }
+            else
+            {
+                // Handle error
+            }
+        }
+    }
+
+}

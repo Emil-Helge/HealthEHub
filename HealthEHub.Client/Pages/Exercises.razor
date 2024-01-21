@@ -1,5 +1,6 @@
 ﻿@page "/exercises"
 @inject HttpClient Http
+@inject AuthenticationService AuthService
 
 <PageTitle>Exercises</PageTitle>
 
@@ -112,6 +113,7 @@
             requestUri = $"exercises/target/{selectedTargetMuscle}?limit={limit}&offset={newOffset}";
         }
 
+        await AuthService.AddTokenToHttpClient();
         var response = await Http.GetFromJsonAsync<List<Exercise>>(requestUri);
         if (response is not null)
         {
