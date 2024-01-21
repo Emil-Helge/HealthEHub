@@ -36,11 +36,11 @@
                          Toggle Password Visibility
                      </MudText>
                  </MudButton>
-                 <MudButton OnClick="HandleRegisterClick" Variant="Variant.Filled" Color="Color.Primary" Disabled="@isLoading">
+                 <MudButton OnClick="HandleRegister" Variant="Variant.Filled" Color="Color.Primary" Disabled="@isLoading">
                      @if (isLoading)
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="pl-3" Typo="Typo.button">Processing registration...</MudText>
+                        <MudText Class="pl-3" Typo="Typo.button">Processing Registration...</MudText>
                     }
                     else
                     {
@@ -85,8 +85,6 @@
     private bool isLoading = false;
     bool success;
     string[] errors = { };
-    public string Password { get; set; } = "superstrong123";
-
     bool isShow;
     InputType PasswordInput = InputType.Password;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
@@ -95,18 +93,13 @@
 
     private RegisterRequest registerRequest = new RegisterRequest();
 
-    private async Task RegisterUser()
-    {
-        await AuthService.Register(registerRequest);
-    }
-
     private async Task HandleValidateClick()
     {
         hasClickedValidate = true;
         await form.Validate();
     }
 
-    private async Task HandleRegisterClick()
+    private async Task HandleRegister()
     {
         hasClickedValidate = true;
         await form.Validate();
@@ -116,7 +109,7 @@
         }
 
         var delayTask = Task.Delay(200);
-        var registerTask = RegisterUser();
+        var registerTask = AuthService.Register(registerRequest);
 
         if (await Task.WhenAny(delayTask, registerTask) == delayTask)
         {
