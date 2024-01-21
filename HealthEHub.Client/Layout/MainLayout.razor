@@ -2,14 +2,14 @@
 @inject ThemeService ThemeService
 
 <MudThemeProvider @bind-IsDarkMode="@ThemeService.IsDarkMode" Theme="HealthEHubTheme" />
-<MudDialogProvider />
+<MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.ExtraSmall" CloseButton="true" DisableBackdropClick="true" NoHeader="true" Position="DialogPosition.Center" CloseOnEscapeKey="true" />
 <MudSnackbarProvider />
 
 
 <MudLayout Class="d-flex flex-column" Style="min-height: 100%;">
     <Header />
     <MudContainer MaxWidth="MaxWidth.Large" Class="flex-grow-1 main-content-container">
-        <MudGrid>
+        <MudGrid Class="mud-height-full">
             @Body
         </MudGrid>
     </MudContainer>
