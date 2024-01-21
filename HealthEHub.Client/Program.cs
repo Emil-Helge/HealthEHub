@@ -2,6 +2,7 @@ using HealthEHub.Client;
 using HealthEHub.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using MudBlazor;
 using MudBlazor.Services;
 
@@ -35,4 +36,10 @@ builder.Services.AddMudServices(config =>
 });
 builder.Services.AddScoped<ThemeService>();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+var authService = host.Services.GetRequiredService<AuthenticationService>();
+
+await authService.Initialize();
+
+await host.RunAsync();
