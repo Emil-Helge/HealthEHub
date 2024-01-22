@@ -43,7 +43,7 @@
     <MudDropContainer T="SavedExercise" Items="_items" ItemsSelector="@((item, dropzone) => (item.WeekNumber == null || item.WeekNumber == _weekNumber) && (dropzone == "Unassigned" ? item.DayOfWeek == null : item.DayOfWeek == dropzone))" ItemDropped="ItemUpdated" Class="d-flex">
         <ChildContent>
             <MudItem xs="5" md="12">
-                <MudDropZone AllowReorder="true" T="SavedExercise" Identifier="Unassigned" Class="rounded mud-background-gray pa-6 ma-10" Style="position: fixed;">
+                <MudDropZone AllowReorder="true" T="SavedExercise" Identifier="Unassigned" Class="rounded mud-background-gray pa-6 ma-10" Style="position: fixed; max-height: 500px; overflow-y: auto;">
                     <MudText Typo="Typo.h6" Class="mb-4">Your Exercises</MudText>
                 </MudDropZone>
             </MudItem>
