@@ -1,6 +1,7 @@
 ﻿@page "/workoutplan/{WorkoutPlanId}"
 @inject HttpClient Http
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>@(workoutPlan?.Name ?? "Loading Workout Plan...")</PageTitle>
 
@@ -38,61 +39,108 @@
         Week @_weekNumber
     </MudText>
 </MudItem>
+<MudHidden Breakpoint="Breakpoint.MdAndDown" Invert>
+    <MudItem xs="12" md="5">
+        <MudCard>
+            <MudExpansionPanel Style="font-weight: 500;" Text=@($"Your Exercises ({_items.GroupBy(i => i.ExerciseId).Count()})")>
+                @foreach (var item in _items.GroupBy(i => i.ExerciseId).Select(g => g.First()))
+                {
+                    <MudListItem>
+                        <MudText Class="py-2" Align="Align.Center">@item.Name</MudText>
+                            <MudStack Row Justify="Justify.SpaceBetween">
+                             <MudButton Size="Size.Small" Href=@($"/exercise/{item.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">Details</MudButton>
+                             <MudButton Size="Size.Small" Color="Color.Error" Variant="Variant.Text" OnClick="@(() => RemoveExercise(item))">Remove</MudButton>
+                         </MudStack>
+                     </MudListItem>
+                    <MudDivider />
+                }
+            </MudExpansionPanel>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" md="7">
+        <MudCard>
+            <MudList>
+                @foreach (var day in daysOfWeekOrdered)
+                {
+                    var exercisesForDay = _items.Where(i => i.DayOfWeek == day.ToString() && i.WeekNumber == _weekNumber).ToList();
+                    <MudExpansionPanel Style="font-weight: 500;" Text=@($"{day} ({exercisesForDay.Count})")>
+                        @foreach (var exercise in exercisesForDay)
+                        {
+                            <MudListItem>
+                                <MudText Class="py-2" Align="Align.Center">@exercise.Name</MudText>
+                                    <MudStack Row Justify="Justify.SpaceBetween">
+                                     <MudButton Size="Size.Small" Href=@($"/exercise/{exercise.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">Details</MudButton>
+                                     <MudIconButton Size="Size.Small" Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(exercise))" />
+                                 </MudStack>
+                             </MudListItem>
+                            <MudDivider />
 
-<MudItem xs="12">
-    <MudDropContainer T="SavedExercise" Items="_items" ItemsSelector="@((item, dropzone) => (item.WeekNumber == null || item.WeekNumber == _weekNumber) && (dropzone == "Unassigned" ? item.DayOfWeek == null : item.DayOfWeek == dropzone))" ItemDropped="ItemUpdated" Class="d-flex">
-        <ChildContent>
-            <MudItem xs="5" md="12">
-                <MudDropZone AllowReorder="true" T="SavedExercise" Identifier="Unassigned" Class="rounded mud-background-gray pa-6 ma-10" Style="position: fixed; max-height: 500px; overflow-y: auto;">
-                    <MudText Typo="Typo.h6" Class="mb-4">Your Exercises</MudText>
-                </MudDropZone>
-            </MudItem>
-            <MudItem xs="7" md="12">
-                <MudGrid>
-                    @foreach (var day in daysOfWeekOrdered)
-                    {
-                        <MudItem xs="12">
-                            <MudDropZone AllowReorder="true" T="SavedExercise" Identifier=@day.ToString() Class="rounded mud-background-gray pa-6 ma-8">
-                                <MudText Typo="Typo.h6" Class="mb-4">
-                                    @day
-                                </MudText>
-                            </MudDropZone>
-                        </MudItem>
-                    }
-                </MudGrid>
-            </MudItem>
-        </ChildContent>
-        <ItemRenderer>
-            <MudCard Class="pa-2 mt-4">
-                <MudStack Justify="Justify.SpaceBetween" Class="flex-wrap">
-                    <MudText Typo="Typo.body1" Align="Align.Center">
-                        @context.Name
-                    </MudText>
-                    <MudStack Row Justify="Justify.SpaceBetween">
-                         <MudButton Href=@($"/exercise/{context.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">
-                             <MudText Typo="Typo.subtitle2">
-                                 Details
-                             </MudText>
+                        }
+                        <MudButton Class="mt-2" FullWidth Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => AddExerciseToDay(day))">
+                             Add Exercise
                          </MudButton>
-                         @if (context.DayOfWeek == null)
-                        {
-                            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="@(() => RemoveExercise(context))">
-                                <MudText Typo="Typo.subtitle2">
-                                    Remove
-                                </MudText>
-                            </MudButton>
-                        }
-                        else
-                        {
-                            <MudIconButton Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(context))" />
-                        }
-                    </MudStack>
-                </MudStack>
-            </MudCard>
-        </ItemRenderer>
-    </MudDropContainer>
-</MudItem>
 
+                     </MudExpansionPanel>
+                }
+            </MudList>
+        </MudCard>
+    </MudItem>
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.LgAndUp" Invert>
+    <MudItem xs="12">
+        <MudDropContainer T="SavedExercise" Items="_items" ItemsSelector="@((item, dropzone) => (item.WeekNumber == null || item.WeekNumber == _weekNumber) && (dropzone == "Unassigned" ? item.DayOfWeek == null : item.DayOfWeek == dropzone))" ItemDropped="ItemUpdated" Class="d-flex">
+            <ChildContent>
+                <MudItem xs="5" md="12">
+                    <MudDropZone AllowReorder="true" T="SavedExercise" Identifier="Unassigned" Class="rounded mud-background-gray pa-6 ma-8" Style="position: fixed; max-height: 550px; overflow-y: auto;">
+                        <MudText Typo="Typo.h6" Class="mb-4">Your Exercises</MudText>
+                    </MudDropZone>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudGrid>
+                        @foreach (var day in daysOfWeekOrdered)
+                        {
+                            <MudItem xs="12" Class="pa-0">
+                                <MudDropZone AllowReorder="true" T="SavedExercise" Identifier=@day.ToString() Class="rounded mud-background-gray pa-6 ma-8">
+                                    <MudText Typo="Typo.h6" Class="mb-4">
+                                        @day
+                                    </MudText>
+                                </MudDropZone>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudItem>
+            </ChildContent>
+            <ItemRenderer>
+                <MudCard Class="pa-2 mt-4">
+                    <MudStack Justify="Justify.SpaceBetween" Class="flex-wrap">
+                        <MudText Typo="Typo.body1" Align="Align.Center">
+                            @context.Name
+                        </MudText>
+                        <MudStack Row Justify="Justify.SpaceBetween">
+                             <MudButton Href=@($"/exercise/{context.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">
+                                 <MudText Typo="Typo.subtitle2">
+                                     Details
+                                 </MudText>
+                             </MudButton>
+                             @if (context.DayOfWeek == null)
+                            {
+                                <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="@(() => RemoveExercise(context))">
+                                    <MudText Typo="Typo.subtitle2">
+                                        Remove
+                                    </MudText>
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudIconButton Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(context))" />
+                            }
+                        </MudStack>
+                    </MudStack>
+                </MudCard>
+            </ItemRenderer>
+        </MudDropContainer>
+    </MudItem>
+</MudHidden>
 @code {
     [Parameter] public string? WorkoutPlanId { get; set; }
     private WorkoutPlan? workoutPlan;
@@ -123,9 +171,6 @@
     private void RemoveInstance(SavedExercise instance)
     {
         _items.RemoveAll(i => i.InstanceId == instance.InstanceId);
-
-        // TODO: Make an HTTP DELETE request to remove the instance from the database
-
         StateHasChanged();
     }
 
@@ -187,5 +232,28 @@
         DayOfWeek.Saturday,
         DayOfWeek.Sunday
     };
+
+    private async Task AddExerciseToDay(DayOfWeek day)
+    {
+        var uniqueExercises = _items.GroupBy(i => i.ExerciseId).Select(g => g.First()).ToList();
+        var dialog = DialogService.Show<SelectExerciseDialog>("Select an Exercise", parameters: new DialogParameters { { "Exercises", uniqueExercises } }, options: new DialogOptions { MaxWidth = MaxWidth.Small });
+        var result = await dialog.Result;
+
+        if (!result.Cancelled && result.Data is SavedExercise selectedExercise)
+        {
+            var newInstance = new SavedExercise
+                {
+                    InstanceId = Guid.NewGuid().ToString(),
+                    ExerciseId = selectedExercise.ExerciseId,
+                    Name = selectedExercise.Name,
+                    DayOfWeek = day.ToString(),
+                    WeekNumber = _weekNumber,
+                    Order = _items.Count(i => i.DayOfWeek == day.ToString())
+                };
+
+            _items.Add(newInstance);
+            StateHasChanged();
+        }
+    }
 
 }
