@@ -1,5 +1,6 @@
 ﻿@page "/workoutplan/{WorkoutPlanId}"
 @inject HttpClient Http
+@inject ISnackbar Snackbar
 
 <PageTitle>@(workoutPlan?.Name ?? "Loading Workout Plan...")</PageTitle>
 
@@ -10,31 +11,181 @@
 </MudItem>
 
 <MudItem xs="12">
-    @if (workoutPlan == null)
+    @if (_items == null || _items.Count == 0)
     {
-        <MudStack Row Spacing="3">
-             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-             <MudText Typo="Typo.body1">
-                 Loading plan...
-             </MudText>
-         </MudStack>
-
-    }
-    else if (workoutPlan.Exercises.Count == 0)
-    {
-        <MudText Typo="Typo.body1" Class="pa-4" Align="Align.Center">No exercises found in this workout plan. Please add some exercises</MudText>
+        <MudText Typo="Typo.h5" Class="pa-4" Align="Align.Center">
+            No exercises found. You can add exercises to your plan on the <MudLink Typo="Typo.h5" Color="Color.Primary" Href="/exercises">exercises page</MudLink>.
+        </MudText>
     }
     else
     {
-        // TODO: render exercises
+        <MudDivider />
     }
 </MudItem>
+
+<MudItem xs="12">
+    <MudStack Row>
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(_weekNumber <= 1)" OnClick="() => _weekNumber--">
+            Previous
+        </MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(_weekNumber >= 12)" OnClick="() => _weekNumber++">
+            Next
+        </MudButton>
+        <MudSpacer />
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveChanges">Save</MudButton>
+    </MudStack>
+    <MudText Align="Align.Center" Typo="Typo.h6" Class="mx-4">
+        Week @_weekNumber
+    </MudText>
+</MudItem>
+
+<MudItem xs="12">
+    <MudDropContainer T="SavedExercise" Items="_items" ItemsSelector="@((item, dropzone) => (item.WeekNumber == null || item.WeekNumber == _weekNumber) && (dropzone == "Unassigned" ? item.DayOfWeek == null : item.DayOfWeek == dropzone))" ItemDropped="ItemUpdated" Class="d-flex">
+        <ChildContent>
+            <MudItem xs="5" md="12">
+                <MudDropZone AllowReorder="true" T="SavedExercise" Identifier="Unassigned" Class="rounded mud-background-gray pa-6 ma-10" Style="position: fixed;">
+                    <MudText Typo="Typo.h6" Class="mb-4">Your Exercises</MudText>
+                </MudDropZone>
+            </MudItem>
+            <MudItem xs="7" md="12">
+                <MudGrid>
+                    @foreach (var day in daysOfWeekOrdered)
+                    {
+                        <MudItem xs="12">
+                            <MudDropZone AllowReorder="true" T="SavedExercise" Identifier=@day.ToString() Class="rounded mud-background-gray pa-6 ma-8">
+                                <MudText Typo="Typo.h6" Class="mb-4">
+                                    @day
+                                </MudText>
+                            </MudDropZone>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudItem>
+        </ChildContent>
+        <ItemRenderer>
+            <MudCard Class="pa-2 mt-4">
+                <MudStack Justify="Justify.SpaceBetween" Class="flex-wrap">
+                    <MudText Typo="Typo.body1" Align="Align.Center">
+                        @context.Name
+                    </MudText>
+                    <MudStack Row Justify="Justify.SpaceBetween">
+                         <MudButton Href=@($"/exercise/{context.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">
+                             <MudText Typo="Typo.subtitle2">
+                                 Details
+                             </MudText>
+                         </MudButton>
+                         @if (context.DayOfWeek == null)
+                        {
+                            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="@(() => RemoveExercise(context))">
+                                <MudText Typo="Typo.subtitle2">
+                                    Remove
+                                </MudText>
+                            </MudButton>
+                        }
+                        else
+                        {
+                            <MudIconButton Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(context))" />
+                        }
+                    </MudStack>
+                </MudStack>
+            </MudCard>
+        </ItemRenderer>
+    </MudDropContainer>
+</MudItem>
+
 @code {
     [Parameter] public string? WorkoutPlanId { get; set; }
     private WorkoutPlan? workoutPlan;
+    private int _weekNumber = 1;
+    private List<SavedExercise> _items = new List<SavedExercise>();
 
     protected override async Task OnInitializedAsync()
     {
         workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+
+        if (workoutPlan?.Exercises != null)
+        {
+            _items = workoutPlan.Exercises.ToList();
+        }
     }
+
+    private async Task RemoveExercise(SavedExercise exercise)
+    {
+        await Http.DeleteAsync($"/workoutplan/{WorkoutPlanId}/exercise/{exercise.ExerciseId}");
+        workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+
+        if (workoutPlan?.Exercises != null)
+        {
+            _items = workoutPlan.Exercises.ToList();
+        }
+    }
+
+    private void RemoveInstance(SavedExercise instance)
+    {
+        _items.RemoveAll(i => i.InstanceId == instance.InstanceId);
+
+        // TODO: Make an HTTP DELETE request to remove the instance from the database
+
+        StateHasChanged();
+    }
+
+    private void ItemUpdated(MudItemDropInfo<SavedExercise> dropItem)
+    {
+        if (dropItem.Item != null && dropItem.DropzoneIdentifier != "Unassigned")
+        {
+            if (dropItem.Item.DayOfWeek == null)
+            {
+                var newInstance = new SavedExercise
+                    {
+                        InstanceId = Guid.NewGuid().ToString(),
+                        ExerciseId = dropItem.Item.ExerciseId,
+                        Name = dropItem.Item.Name,
+                        DayOfWeek = Enum.Parse<DayOfWeek>(dropItem.DropzoneIdentifier).ToString(),
+                        WeekNumber = _weekNumber,
+                        Order = _items.Count(i => i.DayOfWeek == dropItem.DropzoneIdentifier)
+                    };
+
+                _items.Add(newInstance);
+            }
+            else
+            {
+                dropItem.Item.DayOfWeek = Enum.Parse<DayOfWeek>(dropItem.DropzoneIdentifier).ToString();
+            }
+
+            var exercisesInDropzone = _items.Where(i => i.DayOfWeek == dropItem.DropzoneIdentifier).ToList();
+            for (int i = 0; i < exercisesInDropzone.Count; i++)
+            {
+                exercisesInDropzone[i].Order = i;
+            }
+
+            _items = _items.OrderBy(i => i.Order).ToList();
+
+            StateHasChanged();
+        }
+    }
+    private async Task SaveChanges()
+    {
+        var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", _items);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Changes saved successfully.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to save changes. Please try again.", Severity.Error);
+        }
+    }
+
+    private readonly List<DayOfWeek> daysOfWeekOrdered = new List<DayOfWeek>
+    {
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    };
+
 }
