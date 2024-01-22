@@ -1,5 +1,6 @@
 ﻿@page "/exercise/{id}"
 @inject HttpClient Http
+@inject WorkoutPlanService WorkoutPlanService
 
 <PageTitle>@(exercise?.Name ?? "Loading Exercise Details...")</PageTitle>
 
@@ -22,7 +23,7 @@
             }
         }
     </MudItem>
-    <MudItem xs="12" md="5" Class="d-flex justify-center align-start">
+    <MudItem xs="12" md="5" Class="d-flex flex-column justify-start align-center gap-3">
         <MudImage Fluid="true" Src="@exercise.GifUrl" Alt="@exercise.Name" Style="border-radius: 0.5rem;" />
         <AddToProfileButton Exercise="exercise" />
     </MudItem>
@@ -120,12 +121,35 @@ else
     </MudItem>
     <MudDivider />
     <MudItem xs="12">
-        <MudCard>
-            <MudCardContent>
-                <MudSkeleton Height="600px" Width="100%" />
-            </MudCardContent>
-        </MudCard>
-        <MudSkeleton />
+        @if (isYoutubeSearchResultLoaded)
+        {
+            if (youtubeSearchResult?.Contents is not null)
+            {
+                @foreach (var content in youtubeSearchResult.Contents.Take(1))
+                {
+                    var video = content.Video;
+                    <MudCard>
+                        <MudCardContent>
+                            <iframe style="aspect-ratio: 16/9;" src="https://www.youtube.com/embed/@video.VideoId" allowfullscreen alt="@video.Title"></iframe>
+                        </MudCardContent>
+                    </MudCard>
+                    <MudText>Created by: @video.ChannelName</MudText>
+                }
+            }
+            else
+            {
+                <MudText>No videos found.</MudText>
+            }
+        }
+        else
+        {
+            <MudCard>
+                <MudCardContent>
+                    <MudSkeleton Height="600px" Width="100%" />
+                </MudCardContent>
+            </MudCard>
+            <MudSkeleton />
+        }
     </MudItem>
 }
 
@@ -135,6 +159,7 @@ else
 
     private Exercise? exercise;
     private YoutubeSearchResult? youtubeSearchResult;
+    private bool isYoutubeSearchResultLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,6 +167,15 @@ else
         if (exercise is not null)
         {
             youtubeSearchResult = await Http.GetFromJsonAsync<YoutubeSearchResult>($"youtube/search?query={exercise.Name}");
+            isYoutubeSearchResultLoaded = true;
+        }
+    }
+
+    private async Task HandleAddExerciseToProfile()
+    {
+        if (exercise != null)
+        {
+            await WorkoutPlanService.SelectWorkoutPlanAndAddExercise(exercise);
         }
     }
 }
