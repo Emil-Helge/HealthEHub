@@ -1,0 +1,31 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudList>
+            <MudText GutterBottom Typo="Typo.h6">Please select an exercise</MudText>
+             @if (Exercises != null)
+            {
+                foreach (var exercise in Exercises)
+                {
+                    <MudListItem Class="pa-2 cursor-pointer mud-primary-hover" OnClick="@(() => SelectExercise(exercise))">
+                        <MudText Color="Color.Primary" Typo="Typo.body1">
+                            @exercise.Name
+                        </MudText>
+                    </MudListItem>
+                }
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Class="mr-2" Color="Color.Secondary" Variant="Variant.Text" OnClick="@(() => MudDialog.Close())">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public List<SavedExercise>? Exercises { get; set; }
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    void SelectExercise(SavedExercise exercise)
+    {
+        MudDialog.Close(DialogResult.Ok(exercise));
+    }
+}
