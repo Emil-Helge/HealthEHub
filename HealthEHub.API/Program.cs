@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -194,7 +195,7 @@ app.MapGet("/targetmuscles", async (IHttpClientFactory clientFactory) =>
         ? Results.Ok(await response.Content.ReadFromJsonAsync<List<string>>())
         : Results.Problem("API call failed.");
 })
-.WithName("GetTargetMuscles");
+.WithName("GetTargetMuscles").RequireAuthorization();
 
 app.MapGet("/youtube/search", async (string query, IHttpClientFactory clientFactory) =>
 {
@@ -278,99 +279,10 @@ app.MapGet("/workoutplans", async (HealthEHubContext context, UserManager<Identi
 
     var workoutPlans = await context.WorkoutPlans
         .Where(wp => wp.UserId == userId)
-        .Include(wp => wp.Exercises)
         .ToListAsync();
 
     return Results.Ok(workoutPlans);
 })
 .WithName("GetAllWorkoutPlans").RequireAuthorization();
-
-
-app.MapPost("/workoutplan/addExercise", async (SavedExerciseDto savedExerciseDto, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
-{
-    var userId = userManager.GetUserId(user);
-    if (userId == null)
-    {
-        return Results.Problem("User is not authenticated.");
-    }
-
-    var workoutPlan = await context.WorkoutPlans.FindAsync(savedExerciseDto.WorkoutPlanId);
-    if (workoutPlan == null || workoutPlan.UserId != userId)
-    {
-        return Results.NotFound("Workout plan not found or user mismatch.");
-    }
-
-    var savedExercise = new SavedExercise
-    {
-        ExerciseId = savedExerciseDto.ExerciseId,
-        Name = savedExerciseDto.Name,
-        WorkoutPlanId = savedExerciseDto.WorkoutPlanId
-    };
-
-    context.Exercises.Add(savedExercise);
-    await context.SaveChangesAsync();
-
-    return Results.Ok(savedExercise);
-}).WithName("AddExerciseToWorkoutPlan").RequireAuthorization();
-
-app.MapDelete("/workoutplan/{workoutPlanId}/exercise/{exerciseId}", async (int workoutPlanId, string exerciseId, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
-{
-    var userId = userManager.GetUserId(user);
-    if (userId == null)
-    {
-        return Results.Problem("User is not authenticated.");
-    }
-
-    var workoutPlan = await context.WorkoutPlans.FindAsync(workoutPlanId);
-    if (workoutPlan == null || workoutPlan.UserId != userId)
-    {
-        return Results.NotFound("Workout plan not found or user mismatch.");
-    }
-
-    var exercise = await context.Exercises.FirstOrDefaultAsync(e => e.WorkoutPlanId == workoutPlanId && e.ExerciseId == exerciseId);
-    if (exercise == null)
-    {
-        return Results.NotFound("Exercise not found.");
-    }
-
-    context.Exercises.Remove(exercise);
-    await context.SaveChangesAsync();
-
-    return Results.Ok();
-})
-.WithName("RemoveExerciseFromWorkoutPlan").RequireAuthorization();
-
-app.MapPut("/workoutplan/{id}", async (int id, List<SavedExercise> exercises, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
-{
-    var userId = userManager.GetUserId(user);
-    if (userId == null)
-    {
-        return Results.Problem("User is not authenticated.");
-    }
-
-    var workoutPlan = await context.WorkoutPlans
-                                   .Include(wp => wp.Exercises)
-                                   .FirstOrDefaultAsync(wp => wp.WorkoutPlanId == id && wp.UserId == userId);
-
-    if (workoutPlan == null)
-    {
-        return Results.NotFound("Workout plan not found.");
-    }
-
-    context.Exercises.RemoveRange(workoutPlan.Exercises);
-
-    foreach (var exercise in exercises)
-    {
-        exercise.WorkoutPlanId = id;
-        context.Exercises.Add(exercise);
-    }
-
-    await context.SaveChangesAsync();
-
-    return Results.Ok(workoutPlan);
-})
-.WithName("UpdateWorkoutPlan").RequireAuthorization();
-
-
 
 app.Run();

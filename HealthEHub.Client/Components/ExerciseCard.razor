@@ -1,6 +1,4 @@
-﻿@inject WorkoutPlanService WorkoutPlanService
-
-@if (exercise is not null)
+﻿@if (exercise is not null)
 {
     <MudCard>
         <MudCardHeader>
@@ -23,7 +21,7 @@
         </MudCardContent>
         <MudDivider />
         <MudSpacer />
-        <MudCardActions Class="d-flex flex-column gap-2">
+        <MudCardActions>
             <MudButton Href="@($"/exercise/{exercise.Id}")" FullWidth="true" Variant="Variant.Text" Color="Color.Primary">DETAILS</MudButton>
             <AddToProfileButton Exercise="exercise" />
         </MudCardActions>
@@ -59,12 +57,4 @@ else
 @code {
     [Parameter]
     public Exercise? exercise { get; set; }
-
-    private async Task HandleAddExerciseToProfile()
-    {
-        if (exercise != null)
-        {
-            await WorkoutPlanService.SelectWorkoutPlanAndAddExercise(exercise);
-        }
-    }
 }

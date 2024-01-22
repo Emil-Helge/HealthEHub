@@ -22,7 +22,6 @@ builder.Services.AddScoped(sp =>
 });
 
 builder.Services.AddScoped<AuthenticationService>();
-builder.Services.AddScoped<WorkoutPlanService>();
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;
