@@ -67,10 +67,16 @@
                         @foreach (var exercise in exercisesForDay)
                         {
                             <MudListItem>
-                                <MudText Class="py-2" Align="Align.Center">@exercise.Name</MudText>
-                                    <MudStack Row Justify="Justify.SpaceBetween">
+                                <MudText Class="py-2" Align="Align.Center">
+                                    @exercise.Name
+                                </MudText>
+                                <MudStack Row Justify="Justify.SpaceBetween">
                                      <MudButton Size="Size.Small" Href=@($"/exercise/{exercise.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">Details</MudButton>
                                      <MudIconButton Size="Size.Small" Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(exercise))" />
+                                 </MudStack>
+                                 <MudStack Row Justify="Justify.Center">
+                                     <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MoveUp(exercise))" />
+                                     <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MoveDown(exercise))" />
                                  </MudStack>
                              </MudListItem>
                             <MudDivider />
@@ -153,7 +159,14 @@
 
         if (workoutPlan?.Exercises != null)
         {
-            _items = workoutPlan.Exercises.ToList();
+            var instancedItems = workoutPlan.Exercises
+                .Where(e => !string.IsNullOrEmpty(e.InstanceId))
+                .OrderBy(e => e.Order);
+
+            var nonInstancedItems = workoutPlan.Exercises
+                .Where(e => string.IsNullOrEmpty(e.InstanceId));
+
+            _items = instancedItems.Concat(nonInstancedItems).ToList();
         }
     }
 
@@ -208,6 +221,7 @@
             StateHasChanged();
         }
     }
+
     private async Task SaveChanges()
     {
         var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", _items);
@@ -239,7 +253,7 @@
         var dialog = DialogService.Show<SelectExerciseDialog>("Select an Exercise", parameters: new DialogParameters { { "Exercises", uniqueExercises } }, options: new DialogOptions { MaxWidth = MaxWidth.Small });
         var result = await dialog.Result;
 
-        if (!result.Cancelled && result.Data is SavedExercise selectedExercise)
+        if (!result.Canceled && result.Data is SavedExercise selectedExercise)
         {
             var newInstance = new SavedExercise
                 {
@@ -255,5 +269,53 @@
             StateHasChanged();
         }
     }
+
+    private void MoveUp(SavedExercise exercise)
+    {
+        if (exercise.DayOfWeek == null)
+        {
+            return;
+        }
+
+        var index = _items.IndexOf(exercise);
+        if (index > 0 && _items[index - 1].DayOfWeek == exercise.DayOfWeek)
+        {
+            var temp = _items[index - 1];
+            _items[index - 1] = exercise;
+            _items[index] = temp;
+
+            UpdateOrderForDay(exercise.DayOfWeek);
+        }
+    }
+
+    private void MoveDown(SavedExercise exercise)
+    {
+        if (exercise.DayOfWeek == null)
+        {
+            return;
+        }
+
+        var index = _items.IndexOf(exercise);
+        if (index < _items.Count - 1 && _items[index + 1].DayOfWeek == exercise.DayOfWeek)
+        {
+            var temp = _items[index + 1];
+            _items[index + 1] = exercise;
+            _items[index] = temp;
+
+            UpdateOrderForDay(exercise.DayOfWeek);
+        }
+    }
+
+    private void UpdateOrderForDay(string dayOfWeek)
+    {
+        var exercisesForDay = _items.Where(i => i.DayOfWeek == dayOfWeek).ToList();
+        exercisesForDay = exercisesForDay.OrderBy(i => _items.IndexOf(i)).ToList();
+        for (int i = 0; i < exercisesForDay.Count; i++)
+        {
+            exercisesForDay[i].Order = i;
+        }
+    }
+
+
 
 }
