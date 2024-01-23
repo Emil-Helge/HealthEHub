@@ -35,7 +35,7 @@
                              @plan.Name
                         </MudText>
                         <MudStack Row Spacing="2" Class="flex-wrap" Justify="Justify.Center">
-                             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => GoToWorkoutPlan(plan.WorkoutPlanId))">
+                             <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => GoToWorkoutPlan(plan.WorkoutPlanId))">
                                  <MudText Typo="Typo.button">Go to plan</MudText>
                              </MudButton>
                              <MudButton OnClick="@(() => ConfirmDeleteWorkoutPlan(plan.WorkoutPlanId, plan.Name))" Color="Color.Error">Delete</MudButton>
