@@ -15,7 +15,7 @@
     @if (_items == null || _items.Count == 0)
     {
         <MudText Typo="Typo.h5" Class="pa-4" Align="Align.Center">
-            No exercises found. You can add exercises to your plan on the <MudLink Typo="Typo.h5" Color="Color.Primary" Href="/exercises">exercises page</MudLink>.
+            No exercises found. You can add exercises to your plan on the <MudLink Typo="Typo.h5" Color="Color.Info" Href="/exercises">exercises page</MudLink>.
         </MudText>
     }
     else
@@ -61,30 +61,35 @@
         <MudList>
             @foreach (var day in daysOfWeekOrdered)
             {
-                var exercisesForDay = _items.Where(i => i.DayOfWeek == day.ToString() && i.WeekNumber == _weekNumber).ToList();
-                <MudExpansionPanel Style="font-weight: 500;" Text=@($"{day} ({exercisesForDay.Count})")>
+                var exercisesForDay = _instancedItems.Where(i => i.DayOfWeek == day.ToString() && i.WeekNumber == _weekNumber).ToList();
+                <MudExpansionPanel Dense="true" Style="font-weight: 500;" Text=@($"{day} ({exercisesForDay.Count})")>
                     @foreach (var exercise in exercisesForDay)
                     {
-                        <MudListItem>
-                            <MudText Class="py-2" Align="Align.Center">
-                                @exercise.Name
-                            </MudText>
-                            <MudStack Row Justify="Justify.SpaceBetween">
+                        <MudListItem Dense="true">
+                            <MudStack Justify="Justify.SpaceBetween" Class="flex-wrap">
+                                <MudText Class="pa-1" GutterBottom Align="Align.Center">
+                                     @exercise.Name
+                                </MudText>
+                                <MudStack Row>
+                                 <MudText Class="pa-1" Typo="Typo.caption" GutterBottom>Sets: 3</MudText>
+                                 <MudText Class="pa-1" Typo="Typo.caption" GutterBottom>Reps: 8</MudText>
+                             </MudStack>
+                         </MudStack>
+                         <MudStack Row Justify="Justify.SpaceBetween">
                                  <MudButton Size="Size.Small" Href=@($"/exercise/{exercise.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">Details</MudButton>
                                  <MudIconButton Size="Size.Small" Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(exercise))" />
                              </MudStack>
                              <MudStack Row Justify="Justify.Center">
-                                 <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MoveUp(exercise))" />
-                                 <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MoveDown(exercise))" />
+                                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MoveUp(exercise))" />
+                                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ArrowDownward" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MoveDown(exercise))" />
                              </MudStack>
                          </MudListItem>
                         <MudDivider />
 
                     }
-                    <MudButton Class="mt-2" FullWidth Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => AddExerciseToDay(day))">
+                    <MudButton FullWidth Class="mt-2" Color="Color.Primary" Variant="Variant.Outlined" OnClick="@(() => AddExerciseToDay(day))">
                          Add Exercise
                      </MudButton>
-
                  </MudExpansionPanel>
             }
         </MudList>
@@ -95,6 +100,7 @@
     private WorkoutPlan? workoutPlan;
     private int _weekNumber = 1;
     private List<SavedExercise> _items = new List<SavedExercise>();
+    private List<SavedExercise> _instancedItems = new List<SavedExercise>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,31 +115,42 @@
             var nonInstancedItems = workoutPlan.Exercises
                 .Where(e => string.IsNullOrEmpty(e.InstanceId));
 
-            _items = instancedItems.Concat(nonInstancedItems).ToList();
+            _items = nonInstancedItems.ToList();
+            _instancedItems = instancedItems.ToList();
         }
     }
 
     private async Task RemoveExercise(SavedExercise exercise)
     {
-        await Http.DeleteAsync($"/workoutplan/{WorkoutPlanId}/exercise/{exercise.ExerciseId}");
-        workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+        var response = await Http.DeleteAsync($"/workoutplan/{WorkoutPlanId}/exercise/{exercise.ExerciseId}");
 
-        if (workoutPlan?.Exercises != null)
+        if (response.IsSuccessStatusCode)
         {
-            _items = workoutPlan.Exercises.ToList();
+            _items.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
+            _instancedItems.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
+            await SaveChanges();
+        }
+        else
+        {
+            Snackbar.Add("Failed to remove exercise. Please try again.", Severity.Error);
         }
     }
 
     private void RemoveInstance(SavedExercise instance)
     {
-        _items.RemoveAll(i => i.InstanceId == instance.InstanceId);
+        _instancedItems.RemoveAll(i => i.InstanceId == instance.InstanceId);
+        foreach (var day in daysOfWeekOrdered)
+        {
+            UpdateOrderForDay(day.ToString());
+        }
         StateHasChanged();
     }
 
 
     private async Task SaveChanges()
     {
-        var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", _items);
+        var allItems = _items.Concat(_instancedItems).ToList();
+        var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", allItems);
 
         if (response.IsSuccessStatusCode)
         {
@@ -171,10 +188,10 @@
                     Name = selectedExercise.Name,
                     DayOfWeek = day.ToString(),
                     WeekNumber = _weekNumber,
-                    Order = _items.Count(i => i.DayOfWeek == day.ToString())
+                    Order = _instancedItems.Count(i => i.DayOfWeek == day.ToString())
                 };
 
-            _items.Add(newInstance);
+            _instancedItems.Add(newInstance);
             StateHasChanged();
         }
     }
@@ -186,12 +203,12 @@
             return;
         }
 
-        var index = _items.IndexOf(exercise);
-        if (index > 0 && _items[index - 1].DayOfWeek == exercise.DayOfWeek)
+        var index = _instancedItems.IndexOf(exercise);
+        if (index > 0 && _instancedItems[index - 1].DayOfWeek == exercise.DayOfWeek)
         {
-            var temp = _items[index - 1];
-            _items[index - 1] = exercise;
-            _items[index] = temp;
+            var temp = _instancedItems[index - 1];
+            _instancedItems[index - 1] = exercise;
+            _instancedItems[index] = temp;
 
             UpdateOrderForDay(exercise.DayOfWeek);
         }
@@ -204,21 +221,22 @@
             return;
         }
 
-        var index = _items.IndexOf(exercise);
-        if (index < _items.Count - 1 && _items[index + 1].DayOfWeek == exercise.DayOfWeek)
+        var index = _instancedItems.IndexOf(exercise);
+        if (index < _instancedItems.Count - 1 && _instancedItems[index + 1].DayOfWeek == exercise.DayOfWeek)
         {
-            var temp = _items[index + 1];
-            _items[index + 1] = exercise;
-            _items[index] = temp;
+            var temp = _instancedItems[index + 1];
+            _instancedItems[index + 1] = exercise;
+            _instancedItems[index] = temp;
 
             UpdateOrderForDay(exercise.DayOfWeek);
         }
     }
 
+
     private void UpdateOrderForDay(string dayOfWeek)
     {
-        var exercisesForDay = _items.Where(i => i.DayOfWeek == dayOfWeek).ToList();
-        exercisesForDay = exercisesForDay.OrderBy(i => _items.IndexOf(i)).ToList();
+        var exercisesForDay = _instancedItems.Where(i => i.DayOfWeek == dayOfWeek).ToList();
+        exercisesForDay = exercisesForDay.OrderBy(i => _instancedItems.IndexOf(i)).ToList();
         for (int i = 0; i < exercisesForDay.Count; i++)
         {
             exercisesForDay[i].Order = i;
