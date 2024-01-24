@@ -278,13 +278,11 @@ app.MapGet("/workoutplans", async (HealthEHubContext context, UserManager<Identi
 
     var workoutPlans = await context.WorkoutPlans
         .Where(wp => wp.UserId == userId)
-        .Include(wp => wp.Exercises)
         .ToListAsync();
 
     return Results.Ok(workoutPlans);
 })
 .WithName("GetAllWorkoutPlans").RequireAuthorization();
-
 
 app.MapPost("/workoutplan/addExercise", async (SavedExerciseDto savedExerciseDto, HealthEHubContext context, UserManager<IdentityUser> userManager, ClaimsPrincipal user) =>
 {
@@ -294,10 +292,18 @@ app.MapPost("/workoutplan/addExercise", async (SavedExerciseDto savedExerciseDto
         return Results.Problem("User is not authenticated.");
     }
 
-    var workoutPlan = await context.WorkoutPlans.FindAsync(savedExerciseDto.WorkoutPlanId);
+    var workoutPlan = await context.WorkoutPlans
+                                   .Include(wp => wp.Exercises)
+                                   .FirstOrDefaultAsync(wp => wp.WorkoutPlanId == savedExerciseDto.WorkoutPlanId);
+
     if (workoutPlan == null || workoutPlan.UserId != userId)
     {
         return Results.NotFound("Workout plan not found or user mismatch.");
+    }
+
+    if (workoutPlan.Exercises.Any(e => e.Name == savedExerciseDto.Name))
+    {
+        return Results.Problem("This exercise already exists in the selected workout plan.");
     }
 
     var savedExercise = new SavedExercise
