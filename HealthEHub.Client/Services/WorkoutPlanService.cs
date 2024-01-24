@@ -27,18 +27,9 @@ namespace HealthEHub.Client.Services
 
             if (!result.Canceled && result.Data is int selectedPlanId)
             {
-                var selectedPlan = workoutPlans.FirstOrDefault(wp => wp.WorkoutPlanId == selectedPlanId);
-
-                if (selectedPlan != null && selectedPlan.Exercises.Any(e => e.ExerciseId == exercise.Id))
-                {
-                    snackbar.Add("This exercise already exists in the selected workout plan.", Severity.Warning);
-                    return;
-                }
-
                 await AddExerciseToWorkoutPlan(exercise, selectedPlanId);
             }
         }
-
 
         private async Task AddExerciseToWorkoutPlan(Exercise exercise, int workoutPlanId)
         {
@@ -57,7 +48,7 @@ namespace HealthEHub.Client.Services
             }
             else
             {
-                snackbar.Add("Failed to add exercise to the workout plan.", Severity.Error);
+                snackbar.Add("This exercise already exists in the selected workout plan.", Severity.Error);
             }
         }
     }
