@@ -9,6 +9,7 @@
         public int WorkoutPlanId { get; set; }
         public string? DayOfWeek { get; set; }
         public int? WeekNumber { get; set; }
-        public int Order { get; set; }
+        public int? Sets { get; set; }
+        public int? Reps { get; set; }
     }
 }
