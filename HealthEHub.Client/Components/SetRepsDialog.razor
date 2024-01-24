@@ -1,0 +1,22 @@
+﻿<MudDialog>
+    <DialogContent>
+        @if (Exercise != null)
+        {
+            <MudNumericField Label="Sets" @bind-Value="@Exercise.Sets" Min="1" Max="20" />
+            <MudNumericField Label="Reps" @bind-Value="@Exercise.Reps" Min="1" Max="20" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">Submit</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter] public SavedExercise? Exercise { get; set; }
+
+    void Submit() => MudDialog?.Close(DialogResult.Ok(Exercise));
+    void Cancel() => MudDialog?.Cancel();
+}
