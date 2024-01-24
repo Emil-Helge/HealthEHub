@@ -1,25 +1,33 @@
 ﻿@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject WorkoutPlanService WorkoutPlanService
+@inject AuthenticationService AuthService
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddExerciseToProfile">Add to Profile</MudButton>
+<MudButton Style="min-width: 9rem;" Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleAddExerciseToProfile" Disabled="@isDisabled">
+    @if (isLoading)
+    {
+        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+    }
+    else
+    {
+        <MudText Typo="Typo.button">Add to Profile</MudText>
+    }
+</MudButton>
 
 @code {
     [Parameter]
     public Exercise? Exercise { get; set; }
 
-    private async Task AddExerciseToProfile()
+    private bool isLoading = false;
+    private bool isDisabled => !AuthService.IsLoggedIn;
+
+    private async Task HandleAddExerciseToProfile()
     {
         if (Exercise != null)
         {
-            var response = await Http.PostAsJsonAsync("/workoutplan/addExercise", Exercise);
-            if (response.IsSuccessStatusCode)
-            {
-                // Handle success
-            }
-            else
-            {
-                // Handle error
-            }
+            isLoading = true;
+            await WorkoutPlanService.SelectWorkoutPlanAndAddExercise(Exercise);
+            isLoading = false;
         }
     }
-
 }

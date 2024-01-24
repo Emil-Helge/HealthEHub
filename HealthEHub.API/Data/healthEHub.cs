@@ -16,10 +16,9 @@ namespace HealthEHub.API.Data
 
             builder.Entity<WorkoutPlan>()
                 .HasMany(wp => wp.Exercises)
-                .WithOne(e => e.WorkoutPlan)
+                .WithOne()
                 .HasForeignKey(e => e.WorkoutPlanId)
                 .IsRequired(false);
         }
     }
-
 }

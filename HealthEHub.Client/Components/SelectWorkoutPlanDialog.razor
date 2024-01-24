@@ -1,0 +1,28 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudList>
+            <MudText GutterBottom Typo="Typo.h6">Please select a plan</MudText>
+             @foreach (var plan in WorkoutPlans)
+            {
+                <MudListItem Class="pa-2 cursor-pointer mud-primary-hover" OnClick="@(() => SelectPlan(plan.WorkoutPlanId))">
+                    <MudText Color="Color.Primary" Typo="Typo.body1">
+                        @plan.Name
+                    </MudText>
+                </MudListItem>
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudIconButton Icon="@Icons.Material.Filled.Close" Class="mr-2" Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => MudDialog.Close())" />
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public List<WorkoutPlan>? WorkoutPlans { get; set; }
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    void SelectPlan(int planId)
+    {
+        MudDialog.Close(DialogResult.Ok(planId));
+    }
+}

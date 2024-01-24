@@ -68,6 +68,7 @@ namespace HealthEHub.Client.Services
                     await jsRuntime.InvokeVoidAsync("localStorage.setItem", "accessToken", tokenResponse.AccessToken);
                     await jsRuntime.InvokeVoidAsync("localStorage.setItem", "refreshToken", tokenResponse.RefreshToken);
                     IsLoggedIn = true;
+                    await AddTokenToHttpClient();
                     OnLoginStateChanged?.Invoke();
                     navigationManager.NavigateTo("/");
                 }

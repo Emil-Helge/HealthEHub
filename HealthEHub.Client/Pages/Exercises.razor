@@ -2,6 +2,7 @@
 @inject HttpClient Http
 @inject AuthenticationService AuthService
 
+
 <PageTitle>Exercises</PageTitle>
 
 <MudItem xs="12">
@@ -22,7 +23,7 @@
     {
         for (int i = 0; i < countPerPage; i++)
         {
-            <MudItem xs="12" md="6" Style="padding: 0;">
+            <MudItem xs="12" lg="6" Style="padding: 0;">
                 <ExerciseCard />
             </MudItem>
         }
@@ -42,7 +43,7 @@
 
     private bool isSearching = false;
 
-    private int countPerPage = 20;
+    private int countPerPage = 6;
     private int offset = 0;
     private int TotalExercises = 1300;
     private string searchTerm = string.Empty;

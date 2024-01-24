@@ -9,7 +9,7 @@
 
 
 <MudItem xs="10" md="7" Class="mr-auto ml-auto">
-    <MudText Typo="Typo.h5" GutterBottom="true">Your Workout Plans</MudText>
+    <MudText Typo="Typo.h4" GutterBottom="true">Your Workout Plans</MudText>
     @if (workoutPlans == null)
     {
         <MudStack Row Spacing="3">
@@ -31,11 +31,11 @@
             {
                 <MudListItem>
                     <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="flex-wrap">
-                         <MudText Color="Color.Primary" Typo="Typo.body1">
+                         <MudText Color="Color.Primary" Typo="Typo.h6">
                              @plan.Name
                         </MudText>
                         <MudStack Row Spacing="2" Class="flex-wrap" Justify="Justify.Center">
-                             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => GoToWorkoutPlan(plan.WorkoutPlanId))">
+                             <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="@(() => GoToWorkoutPlan(plan.WorkoutPlanId))">
                                  <MudText Typo="Typo.button">Go to plan</MudText>
                              </MudButton>
                              <MudButton OnClick="@(() => ConfirmDeleteWorkoutPlan(plan.WorkoutPlanId, plan.Name))" Color="Color.Error">Delete</MudButton>
@@ -50,7 +50,7 @@
 
 <MudItem xs="10" md="4" Class="mr-auto ml-auto">
     <MudCard Class="pa-4">
-        <MudText Align="Align.Center" Typo="Typo.h5" GutterBottom="true">Create Workout Plan</MudText>
+        <MudText Align="Align.Center" Typo="Typo.h6" GutterBottom="true">Create Workout Plan</MudText>
         <MudForm @ref="form" Model="newWorkoutPlan" Class="d-flex flex-column justify-center gap-2">
             <MudTextField T="string" Label="Workout Plan Name" @bind-Value="newWorkoutPlan.Name" Required="true" RequiredError="Name is required" />
             <MudButton OnClick="CreateWorkoutPlan" Color="Color.Primary">Create Plan</MudButton>

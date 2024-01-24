@@ -4,6 +4,7 @@ using HealthEHub.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthEHub.API.Migrations
 {
     [DbContext(typeof(HealthEHubContext))]
-    partial class HealthEHubContextModelSnapshot : ModelSnapshot
+    [Migration("20240121030443_UpdateExerciseModel")]
+    partial class UpdateExerciseModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -228,29 +231,13 @@ namespace HealthEHub.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SavedExerciseId"));
 
-                    b.Property<string>("DayOfWeek")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ExerciseId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("InstanceId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Reps")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Sets")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("WeekNumber")
-                        .HasColumnType("int");
 
                     b.Property<int>("WorkoutPlanId")
                         .HasColumnType("int");

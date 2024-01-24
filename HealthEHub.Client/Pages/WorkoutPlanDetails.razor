@@ -1,40 +1,206 @@
 ﻿@page "/workoutplan/{WorkoutPlanId}"
 @inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>@(workoutPlan?.Name ?? "Loading Workout Plan...")</PageTitle>
 
 <MudItem xs="12">
-    <MudText Typo="Typo.h4" Align="Align.Center">
-        Workout Plan: @workoutPlan?.Name
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="justify-center">
+        @workoutPlan?.Name
     </MudText>
 </MudItem>
+<MudDivider />
+<MudItem xs="12" Class="d-flex flex-column justify-end" Style="min-height: 300px;">
+    <MudStack Row Justify="Justify.Center">
+         <MudIconButton Icon="@Icons.Material.Filled.NavigateBefore" Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(_weekNumber <= 1)" OnClick="() => { _weekNumber--; }" />
+         <MudText Align="Align.Center" Typo="Typo.h5" Class="mx-4">
+             Week @_weekNumber
+        </MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.NavigateNext" Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(_weekNumber >= 12)" OnClick="() => { _weekNumber++; }" />
+    </MudStack>
+</MudItem>
+<MudItem xs="12" md="5">
+    <MudCard>
+        <MudExpansionPanel Style="font-weight: 500;" Text=@($"Your Exercises ({_items.GroupBy(i => i.ExerciseId).Count()})")>
+            @if (_items != null && _items.Any())
+            {
+                foreach (var item in _items.GroupBy(i => i.ExerciseId).Select(g => g.First()))
+                {
+                    <MudListItem>
+                        <MudText Color="Color.Primary" Style="font-weight: 500;" Class="py-2 pl-1">@item.Name</MudText>
+                            <MudStack Row Justify="Justify.SpaceBetween">
+                             <MudSpacer />
+                             <MudButton Size="Size.Small" Href=@($"/exercise/{item.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">Details</MudButton>
+                             <MudButton Size="Size.Small" Color="Color.Error" Variant="Variant.Text" OnClick="@(() => RemoveExercise(item))">Remove</MudButton>
+                         </MudStack>
+                     </MudListItem>
+                    <MudDivider />
+                }
+            }
+            else
+            {
+                <MudText>
+                    No exercises found. You can add exercises to your plan on the <MudLink Typo="Typo.body1" Color="Color.Info" Href="/exercises">exercises page</MudLink>.
+                </MudText>
+            }
+        </MudExpansionPanel>
+    </MudCard>
+</MudItem>
+<MudItem xs="12" md="7">
+    <MudCard>
+        <MudList>
+            @foreach (var day in daysOfWeekOrdered)
+            {
+                var exercisesForDay = _instancedItems.Where(i => i.DayOfWeek == day.ToString() && i.WeekNumber == _weekNumber).ToList();
+                <MudExpansionPanel Dense="true" Style="font-weight: 500;" Text=@($"{day} ({exercisesForDay.Count})")>
+                    @foreach (var exercise in exercisesForDay)
+                    {
+                        <MudListItem Dense="true">
+                            <MudStack Spacing=0 Justify="Justify.SpaceBetween" Class="flex-wrap">
+                                <MudText Color="Color.Primary" Class="pl-1 pt-2" Style="font-weight: 500;">
+                                    @exercise.Name
+                                </MudText>
+                                <MudStack Spacing=1 Row AlignItems="AlignItems.Center">
+                                     <MudText Class="py-2 pl-1" Style="font-weight: 500;" Typo="Typo.caption">
+                                         Sets: @exercise.Sets | Reps: @exercise.Reps
+                                    </MudText>
+                                </MudStack>
+                            </MudStack>
+                            <MudStack Row Justify="Justify.SpaceBetween">
+                                 <MudIconButton Class="pa-1 mb-1" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => OpenSetRepsDialog(exercise))" />
+                                 <MudButton Size="Size.Small" FullWidth Href=@($"/exercise/{exercise.ExerciseId}") Color="Color.Primary" Variant="Variant.Text">Details</MudButton>
+                                 <MudIconButton Size="Size.Small" Icon=@Icons.Material.Filled.Clear Color="Color.Error" OnClick="@(() => RemoveInstance(exercise))" />
+                             </MudStack>
 
-<MudItem xs="12">
-    @if (workoutPlan == null)
-    {
-        <MudStack Row Spacing="3">
-             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-             <MudText Typo="Typo.body1">
-                 Loading plan...
-             </MudText>
-         </MudStack>
+                         </MudListItem>
+                        <MudDivider />
 
-    }
-    else if (workoutPlan.Exercises.Count == 0)
-    {
-        <MudText Typo="Typo.body1" Class="pa-4" Align="Align.Center">No exercises found in this workout plan. Please add some exercises</MudText>
-    }
-    else
-    {
-        // TODO: render exercises
-    }
+                    }
+                    <MudStack Justify="Justify.Center">
+                        <MudButton Class="my-2 mr-auto ml-auto" Color="Color.Primary" Variant="Variant.Outlined" OnClick="@(() => AddExerciseToDay(day))">
+                            Add Exercise
+                        </MudButton>
+                    </MudStack>
+                </MudExpansionPanel>
+            }
+        </MudList>
+    </MudCard>
 </MudItem>
 @code {
     [Parameter] public string? WorkoutPlanId { get; set; }
     private WorkoutPlan? workoutPlan;
+    private int _weekNumber = 1;
+    private List<SavedExercise> _items = new List<SavedExercise>();
+    private List<SavedExercise> _instancedItems = new List<SavedExercise>();
 
     protected override async Task OnInitializedAsync()
     {
         workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+
+        if (workoutPlan?.Exercises != null)
+        {
+            var instancedItems = workoutPlan.Exercises
+                .Where(e => !string.IsNullOrEmpty(e.InstanceId));
+
+            var nonInstancedItems = workoutPlan.Exercises
+                .Where(e => string.IsNullOrEmpty(e.InstanceId));
+
+            _items = nonInstancedItems.ToList();
+            _instancedItems = instancedItems.ToList();
+        }
     }
+
+    private async Task RemoveExercise(SavedExercise exercise)
+    {
+        var response = await Http.DeleteAsync($"/workoutplan/{WorkoutPlanId}/exercise/{exercise.ExerciseId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            _items.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
+            _instancedItems.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
+            await SaveChanges();
+        }
+        else
+        {
+            Snackbar.Add("Failed to remove exercise. Please try again.", Severity.Error);
+        }
+    }
+
+    private async void RemoveInstance(SavedExercise instance)
+    {
+        _instancedItems.RemoveAll(i => i.InstanceId == instance.InstanceId);
+        StateHasChanged();
+        await SaveChanges();
+    }
+
+
+    private async Task SaveChanges()
+    {
+        var allItems = _items.Concat(_instancedItems).ToList();
+        var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", allItems);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Failed to save changes. Please try again.", Severity.Error);
+        }
+    }
+
+    private readonly List<DayOfWeek> daysOfWeekOrdered = new List<DayOfWeek>
+    {
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    };
+
+    private async Task AddExerciseToDay(DayOfWeek day)
+    {
+        var uniqueExercises = _items.GroupBy(i => i.ExerciseId).Select(g => g.First()).ToList();
+        var dialog = DialogService.Show<SelectExerciseDialog>("Select an Exercise", parameters: new DialogParameters { { "Exercises", uniqueExercises } }, options: new DialogOptions { MaxWidth = MaxWidth.Small });
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is SavedExercise selectedExercise)
+        {
+            if (_instancedItems.Any(i => i.DayOfWeek == day.ToString() && i.Name == selectedExercise.Name && i.WeekNumber == _weekNumber))
+            {
+                Snackbar.Add("An exercise with this name already exists for this day.", Severity.Error);
+            }
+            else
+            {
+                var newInstance = new SavedExercise
+                    {
+                        InstanceId = Guid.NewGuid().ToString(),
+                        ExerciseId = selectedExercise.ExerciseId,
+                        Name = selectedExercise.Name,
+                        DayOfWeek = day.ToString(),
+                        WeekNumber = _weekNumber,
+                    };
+
+                _instancedItems.Add(newInstance);
+                StateHasChanged();
+                await SaveChanges();
+            }
+        }
+    }
+
+    private async Task OpenSetRepsDialog(SavedExercise exercise)
+    {
+        var dialog = DialogService.Show<SetRepsDialog>("Set Reps and Sets",
+            parameters: new DialogParameters { { "Exercise", exercise } },
+            options: new DialogOptions { MaxWidth = MaxWidth.Small });
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is SavedExercise updatedExercise)
+        {
+            exercise.Sets = updatedExercise.Sets;
+            exercise.Reps = updatedExercise.Reps;
+            StateHasChanged();
+            await SaveChanges();
+        }
+    }
+
 }
