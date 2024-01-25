@@ -19,6 +19,12 @@
             </MudItem>
         }
     }
+    else if (isSearching)
+    {
+        <MudItem xs="12">
+            <MudText>No results found</MudText>
+        </MudItem>
+    }
     else
     {
         for (int i = 0; i < countPerPage; i++)
@@ -28,9 +34,9 @@
             </MudItem>
         }
     }
-
 </MudGrid>
-<MudButton Class="mt-2" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises">Load More </MudButton>
+
+<MudButton Style="max-height: 3rem;" Class="mt-2" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises">Load More </MudButton>
 
 @code {
     private string[]? AllEquipment;
@@ -52,6 +58,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await AuthService.CheckAuthorization();
+
         TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
         AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
 

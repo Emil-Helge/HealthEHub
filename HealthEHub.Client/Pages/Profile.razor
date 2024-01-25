@@ -71,6 +71,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await AuthService.CheckAuthorization();
+
         if (!AuthService.IsLoggedIn)
         {
             NavigationManager.NavigateTo("/login");
@@ -95,45 +97,66 @@
 
     private async Task CreateWorkoutPlan()
     {
-        await form.Validate();
-        if (!form.IsValid)
-        {
-            return;
-        }
+        await AuthService.CheckAuthorization();
 
-        var response = await Http.PostAsJsonAsync("/workoutplan", newWorkoutPlan);
-        if (response.IsSuccessStatusCode)
+        if (!AuthService.IsLoggedIn)
         {
-            var createdWorkoutPlan = await response.Content.ReadFromJsonAsync<WorkoutPlan>();
-
-            workoutPlans = await FetchWorkoutPlans();
-            newWorkoutPlan = new WorkoutPlan();
-            form?.ResetAsync();
-            StateHasChanged();
+            NavigationManager.NavigateTo("/login");
         }
         else
         {
-            Snackbar.Add("Failed to create the workout plan. Please try again.", Severity.Error);
+            await form.Validate();
+            if (!form.IsValid)
+            {
+                return;
+            }
+
+            var response = await Http.PostAsJsonAsync("/workoutplan", newWorkoutPlan);
+            if (response.IsSuccessStatusCode)
+            {
+                var createdWorkoutPlan = await response.Content.ReadFromJsonAsync<WorkoutPlan>();
+
+                workoutPlans = await FetchWorkoutPlans();
+                newWorkoutPlan = new WorkoutPlan();
+                form?.ResetAsync();
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Failed to create the workout plan. Please try again.", Severity.Error);
+            }
         }
+
     }
 
     private async Task DeleteWorkoutPlan(int workoutPlanId)
     {
-        var response = await Http.DeleteAsync($"/workoutplan/{workoutPlanId}");
-        if (response.IsSuccessStatusCode)
+        await AuthService.CheckAuthorization();
+
+        if (!AuthService.IsLoggedIn)
         {
-            workoutPlans = workoutPlans?.Where(wp => wp.WorkoutPlanId != workoutPlanId).ToList();
-            StateHasChanged();
+            NavigationManager.NavigateTo("/login");
         }
         else
         {
-            Snackbar.Add("Failed to delete the workout plan. Please try again.", Severity.Error);
+            var response = await Http.DeleteAsync($"/workoutplan/{workoutPlanId}");
+            if (response.IsSuccessStatusCode)
+            {
+                workoutPlans = workoutPlans?.Where(wp => wp.WorkoutPlanId != workoutPlanId).ToList();
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete the workout plan. Please try again.", Severity.Error);
+            }
         }
     }
 
     private async Task Logout()
     {
         await AuthService.Logout();
+        NavigationManager.NavigateTo("/login");
+
     }
 
     private async Task ConfirmDeleteWorkoutPlan(int workoutPlanId, string planName)

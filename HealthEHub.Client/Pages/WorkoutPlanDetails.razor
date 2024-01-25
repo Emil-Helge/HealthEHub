@@ -2,6 +2,9 @@
 @inject HttpClient Http
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject AuthenticationService AuthService
+@inject NavigationManager NavigationManager
+
 
 <PageTitle>@(workoutPlan?.Name ?? "Loading Workout Plan...")</PageTitle>
 
@@ -95,7 +98,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+        await AuthService.CheckAuthorization();
+
+        if (!AuthService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            workoutPlan = await Http.GetFromJsonAsync<WorkoutPlan>($"/workoutplan/{WorkoutPlanId}");
+        }
 
         if (workoutPlan?.Exercises != null)
         {
@@ -112,37 +124,66 @@
 
     private async Task RemoveExercise(SavedExercise exercise)
     {
-        var response = await Http.DeleteAsync($"/workoutplan/{WorkoutPlanId}/exercise/{exercise.ExerciseId}");
+        await AuthService.CheckAuthorization();
 
-        if (response.IsSuccessStatusCode)
+        if (!AuthService.IsLoggedIn)
         {
-            _items.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
-            _instancedItems.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
-            await SaveChanges();
+            NavigationManager.NavigateTo("/login");
         }
         else
         {
-            Snackbar.Add("Failed to remove exercise. Please try again.", Severity.Error);
+            var response = await Http.DeleteAsync($"/workoutplan/{WorkoutPlanId}/exercise/{exercise.ExerciseId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _items.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
+                _instancedItems.RemoveAll(i => i.ExerciseId == exercise.ExerciseId);
+                await SaveChanges();
+            }
+            else
+            {
+                Snackbar.Add("Failed to remove exercise. Please try again.", Severity.Error);
+            }
         }
     }
 
     private async void RemoveInstance(SavedExercise instance)
     {
-        _instancedItems.RemoveAll(i => i.InstanceId == instance.InstanceId);
-        StateHasChanged();
-        await SaveChanges();
+        await AuthService.CheckAuthorization();
+
+        if (!AuthService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            _instancedItems.RemoveAll(i => i.InstanceId == instance.InstanceId);
+            StateHasChanged();
+            await SaveChanges();
+        }
+
     }
 
 
     private async Task SaveChanges()
     {
-        var allItems = _items.Concat(_instancedItems).ToList();
-        var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", allItems);
+        await AuthService.CheckAuthorization();
 
-        if (!response.IsSuccessStatusCode)
+        if (!AuthService.IsLoggedIn)
         {
-            Snackbar.Add("Failed to save changes. Please try again.", Severity.Error);
+            NavigationManager.NavigateTo("/login");
         }
+        else
+        {
+            var allItems = _items.Concat(_instancedItems).ToList();
+            var response = await Http.PutAsJsonAsync($"/workoutplan/{WorkoutPlanId}", allItems);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Failed to save changes. Please try again.", Severity.Error);
+            }
+        }
+
     }
 
     private readonly List<DayOfWeek> daysOfWeekOrdered = new List<DayOfWeek>
@@ -158,48 +199,68 @@
 
     private async Task AddExerciseToDay(DayOfWeek day)
     {
-        var uniqueExercises = _items.GroupBy(i => i.ExerciseId).Select(g => g.First()).ToList();
-        var dialog = DialogService.Show<SelectExerciseDialog>("Select an Exercise", parameters: new DialogParameters { { "Exercises", uniqueExercises } }, options: new DialogOptions { MaxWidth = MaxWidth.Small });
-        var result = await dialog.Result;
+        await AuthService.CheckAuthorization();
 
-        if (!result.Canceled && result.Data is SavedExercise selectedExercise)
+        if (!AuthService.IsLoggedIn)
         {
-            if (_instancedItems.Any(i => i.DayOfWeek == day.ToString() && i.Name == selectedExercise.Name && i.WeekNumber == _weekNumber))
-            {
-                Snackbar.Add("An exercise with this name already exists for this day.", Severity.Error);
-            }
-            else
-            {
-                var newInstance = new SavedExercise
-                    {
-                        InstanceId = Guid.NewGuid().ToString(),
-                        ExerciseId = selectedExercise.ExerciseId,
-                        Name = selectedExercise.Name,
-                        DayOfWeek = day.ToString(),
-                        WeekNumber = _weekNumber,
-                    };
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            var uniqueExercises = _items.GroupBy(i => i.ExerciseId).Select(g => g.First()).ToList();
+            var dialog = DialogService.Show<SelectExerciseDialog>("Select an Exercise", parameters: new DialogParameters { { "Exercises", uniqueExercises } }, options: new DialogOptions { MaxWidth = MaxWidth.Small });
+            var result = await dialog.Result;
 
-                _instancedItems.Add(newInstance);
-                StateHasChanged();
-                await SaveChanges();
+            if (!result.Canceled && result.Data is SavedExercise selectedExercise)
+            {
+                if (_instancedItems.Any(i => i.DayOfWeek == day.ToString() && i.Name == selectedExercise.Name && i.WeekNumber == _weekNumber))
+                {
+                    Snackbar.Add("An exercise with this name already exists for this day.", Severity.Error);
+                }
+                else
+                {
+                    var newInstance = new SavedExercise
+                        {
+                            InstanceId = Guid.NewGuid().ToString(),
+                            ExerciseId = selectedExercise.ExerciseId,
+                            Name = selectedExercise.Name,
+                            DayOfWeek = day.ToString(),
+                            WeekNumber = _weekNumber,
+                        };
+
+                    _instancedItems.Add(newInstance);
+                    StateHasChanged();
+                    await SaveChanges();
+                }
             }
         }
+
     }
 
     private async Task OpenSetRepsDialog(SavedExercise exercise)
     {
-        var dialog = DialogService.Show<SetRepsDialog>("Set Reps and Sets",
-            parameters: new DialogParameters { { "Exercise", exercise } },
-            options: new DialogOptions { MaxWidth = MaxWidth.Small });
-        var result = await dialog.Result;
+        await AuthService.CheckAuthorization();
 
-        if (!result.Canceled && result.Data is SavedExercise updatedExercise)
+        if (!AuthService.IsLoggedIn)
         {
-            exercise.Sets = updatedExercise.Sets;
-            exercise.Reps = updatedExercise.Reps;
-            StateHasChanged();
-            await SaveChanges();
+            NavigationManager.NavigateTo("/login");
         }
+        else
+        {
+            var dialog = DialogService.Show<SetRepsDialog>("Set Reps and Sets",
+                parameters: new DialogParameters { { "Exercise", exercise } },
+                options: new DialogOptions { MaxWidth = MaxWidth.Small });
+            var result = await dialog.Result;
+
+            if (!result.Canceled && result.Data is SavedExercise updatedExercise)
+            {
+                exercise.Sets = updatedExercise.Sets;
+                exercise.Reps = updatedExercise.Reps;
+                StateHasChanged();
+                await SaveChanges();
+            }
+        }
+
     }
 
 }
