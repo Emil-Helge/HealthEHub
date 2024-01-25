@@ -70,7 +70,7 @@ namespace HealthEHub.Client.Services
                     IsLoggedIn = true;
                     await AddTokenToHttpClient();
                     OnLoginStateChanged?.Invoke();
-                    navigationManager.NavigateTo("/");
+                    navigationManager.NavigateTo("/profile");
                 }
             }
             else
@@ -87,13 +87,39 @@ namespace HealthEHub.Client.Services
             await jsRuntime.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
             IsLoggedIn = false;
             OnLoginStateChanged?.Invoke();
-            navigationManager.NavigateTo("/login");
         }
 
         public async Task<string?> GetAccessToken()
         {
             return await jsRuntime.InvokeAsync<string>("localStorage.getItem", "accessToken");
         }
+
+        public async Task CheckAuthorization()
+        {
+            try
+            {
+                var accessToken = await jsRuntime.InvokeAsync<string>("localStorage.getItem", "accessToken");
+                var refreshToken = await jsRuntime.InvokeAsync<string>("localStorage.getItem", "refreshToken");
+
+                if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
+                {
+                    await Logout();
+                    return;
+                }
+
+                var response = await httpClient.GetAsync("/check-authorization");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    await Logout();
+                }
+            }
+            catch (HttpRequestException)
+            {
+                await Logout();
+            }
+        }
+
     }
 
     public class TokenResponse
@@ -103,4 +129,5 @@ namespace HealthEHub.Client.Services
         public int ExpiresIn { get; set; }
         public string? RefreshToken { get; set; }
     }
+
 }
