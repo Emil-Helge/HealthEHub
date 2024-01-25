@@ -10,7 +10,16 @@
 </MudItem>
 
 <MudGrid>
-    @if (displayedExercises is not null && displayedExercises.Count > 0)
+    @if (isLoading)
+    {
+        for (int i = 0; i < countPerPage; i++)
+        {
+            <MudItem xs="12" lg="6" Style="padding: 0;">
+                <ExerciseCard />
+            </MudItem>
+        }
+    }
+    else if (displayedExercises is not null && displayedExercises.Count > 0)
     {
         @foreach (Exercise exercise in displayedExercises)
         {
@@ -21,16 +30,29 @@
     }
     else
     {
-        for (int i = 0; i < countPerPage; i++)
-        {
-            <MudItem xs="12" lg="6" Style="padding: 0;">
-                <ExerciseCard />
-            </MudItem>
-        }
+        <MudItem xs="12" Class="d-flex flex-column align-center">
+            <MudIcon Icon="@Icons.Material.Filled.SentimentNeutral" />
+            <MudText>  No results found</MudText>
+        </MudItem>
     }
-
 </MudGrid>
-<MudButton Class="mt-2" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises">Load More </MudButton>
+
+<MudButton Style="max-height: 3rem;" Class="mt-2" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises" Disabled="!hasMoreExercises || isLoading">
+    @if (isLoading)
+    {
+        <MudText Typo="Typo.button">Loading...</MudText>
+    }
+    else if (hasMoreExercises)
+    {
+        <MudText Typo="Typo.button">Load More</MudText>
+    }
+    else
+    {
+        <MudText Typo="Typo.button">No more results</MudText>
+    }
+</MudButton>
+
+
 
 @code {
     private string[]? AllEquipment;
@@ -38,10 +60,14 @@
     private string[]? TargetMuscles;
     private string selectedTargetMuscle = string.Empty;
 
+    private bool isLoading = true;
+    private bool isSearching = false;
+    private bool isFiltering = false;
+    private bool hasMoreExercises = true;
+
     private string[]? BodyParts;
     private string selectedBodyPart = string.Empty;
 
-    private bool isSearching = false;
 
     private int countPerPage = 4;
     private int offset = 0;
@@ -52,6 +78,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await AuthService.CheckAuthorization();
+
         TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
         AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
 
@@ -61,6 +89,9 @@
 
     private async Task SetSelectedBodyPart(string bodyPart)
     {
+        isLoading = true;
+        isFiltering = true;
+
         selectedEquipment = string.Empty;
         selectedTargetMuscle = string.Empty;
         selectedBodyPart = bodyPart;
@@ -74,6 +105,9 @@
 
     private async Task SetSelectedEquipment(string equipment)
     {
+        isLoading = true;
+        isFiltering = true;
+
         selectedBodyPart = string.Empty;
         selectedTargetMuscle = string.Empty;
         selectedEquipment = equipment;
@@ -87,6 +121,9 @@
 
     private async Task SetSelectedTargetMuscle(string targetMuscle)
     {
+        isLoading = true;
+        isFiltering = true;
+
         selectedBodyPart = string.Empty;
         selectedEquipment = string.Empty;
         selectedTargetMuscle = targetMuscle;
@@ -100,6 +137,9 @@
 
     private async Task LoadExercises(int newOffset, int limit, string bodyPartFilter = "")
     {
+        isLoading = true;
+        hasMoreExercises = true;
+
         var requestUri = $"exercises?limit={limit}&offset={newOffset}";
         if (!string.IsNullOrEmpty(selectedBodyPart))
         {
@@ -125,6 +165,11 @@
             displayedExercises.AddRange(response);
             offset += response.Count;
         }
+        if (response?.Count < limit)
+        {
+            hasMoreExercises = false;
+        }
+        isLoading = false;
     }
 
     private async Task LoadMoreExercises()
@@ -138,7 +183,7 @@
                 offset += response.Count;
             }
         }
-        else
+        else if (isFiltering)
         {
             await LoadExercises(offset, countPerPage);
         }
@@ -146,7 +191,9 @@
 
     private async Task HandleSearch()
     {
+        isLoading = true;
         isSearching = !string.IsNullOrWhiteSpace(searchTerm);
+        isFiltering = false;
 
         if (isSearching)
         {
@@ -168,6 +215,8 @@
         {
             await LoadExercises(offset, countPerPage);
         }
+        isLoading = false;
+
     }
 
 
@@ -188,6 +237,8 @@
 
     private async Task ClearFilter()
     {
+        isFiltering = true;
+
         selectedBodyPart = string.Empty;
         selectedEquipment = string.Empty;
         selectedTargetMuscle = string.Empty;
