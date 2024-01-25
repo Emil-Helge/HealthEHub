@@ -5,14 +5,13 @@
 
 <PageTitle>@(workoutPlan?.Name ?? "Loading Workout Plan...")</PageTitle>
 
-<MudItem xs="12">
-    <MudText Typo="Typo.h4" Align="Align.Center" Class="justify-center">
-        @workoutPlan?.Name
-    </MudText>
-</MudItem>
-<MudDivider />
-<MudItem xs="12" Class="d-flex flex-column justify-end" Style="min-height: 300px;">
-    <MudStack Row Justify="Justify.Center">
+<MudItem xs="12" Class="rounded d-flex align-center justify-space-between" Style="background: var(--mud-palette-dark-lighten)">
+    <MudText Color="Color.Primary" Style="font-weight: 800; letter-spacing: 0.5rem;" Typo="Typo.h4" Align="Align.Center" Class="justify-center"> @workoutPlan?.Name.ToUpper()</MudText>
+        <MudImage Src="images/workout-plan.svg" Height="150" />
+    </MudItem>
+    <MudDivider />
+    <MudItem xs="12" Class="d-flex flex-column justify-end" Style="min-height: 200px;">
+        <MudStack Row Justify="Justify.Center">
          <MudIconButton Icon="@Icons.Material.Filled.NavigateBefore" Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(_weekNumber <= 1)" OnClick="() => { _weekNumber--; }" />
          <MudText Align="Align.Center" Typo="Typo.h5" Class="mx-4">
              Week @_weekNumber
@@ -22,8 +21,8 @@
 </MudItem>
 <MudItem xs="12" md="5">
     <MudCard>
-        <MudExpansionPanel Style="font-weight: 500;" Text=@($"Your Exercises ({_items.GroupBy(i => i.ExerciseId).Count()})")>
-            @if (_items != null && _items.Any())
+        <MudExpansionPanel IsInitiallyExpanded Style="font-weight: 500;" Text=@($"Your Exercises ({_items.GroupBy(i => i.ExerciseId).Count()})")>
+             @if (_items != null && _items.Any())
             {
                 foreach (var item in _items.GroupBy(i => i.ExerciseId).Select(g => g.First()))
                 {

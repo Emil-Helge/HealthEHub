@@ -1,12 +1,37 @@
 ﻿@page "/"
 @inject HttpClient Http
+@inject HealthEHub.Client.Services.AuthenticationService AuthService
 
 <PageTitle>Home</PageTitle>
 
 <MudItem xs="12">
     <Carousel />
+    <MudDivider Class="my-6" />
+</MudItem>
+<MudItem xs="12" lg="6" Class="d-flex flex-column gap-3 justify-center align-center">
+    <MudImage Src="images/brand.svg" Height="210" />
+    <MudText Class="d-flex flex-column gap-1" Style="max-width: 500px;">
+        <MudText><MudText Color="Color.Primary" Inline>HealthEHub</MudText> is a free online resource for all your fitness needs.</MudText>
+        <MudText>By becoming a member you will be able to create and customize your very own workout plans by adding selected exercises from the expansive and varied array of choices.</MudText>
+        <MudText>Sign up now in order to start tailoring your very own workout plan.</MudText>
+    </MudText>
+    <MudButton Style="min-width: 100px;" Href="/register" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@AuthService.IsLoggedIn">Register</MudButton>
+</MudItem>
+<MudItem xs="12" lg="6" Class="d-flex flex-column gap-3 justify-center align-center">
+    <MudImage Src="images/fitness-image-wide.svg" Height="210" />
+    <MudText Class="d-flex flex-column gap-1" Style="max-width: 500px;">
+        <MudText> If you're curious about anything, need some help navigating the site, or want personalized advice on your fitness journey, don't hesitate to reach out.</MudText>
+        <MudText>For quick answers to common questions, the FAQ section is the right place to go. It's a great starting point to learn more about how <MudText Color="Color.Primary" Inline>HealthEHub</MudText> works.</MudText>
+    </MudText>
+    <MudButtonGroup Variant="Variant.Outlined" Color="Color.Primary">
+        <MudButton Style="min-width: 100px;" Href="/contact">Contact</MudButton>
+        <MudButton Style="min-width: 100px;" Href="/faq">FAQ</MudButton>
+    </MudButtonGroup>
 </MudItem>
 
 @code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.Initialize();
+    }
 }

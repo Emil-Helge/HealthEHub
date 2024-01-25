@@ -5,6 +5,7 @@
 @page "/register"
 @inject HttpClient Http
 @inject AuthenticationService AuthService
+@inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 
 <PageTitle>Register</PageTitle>
@@ -22,7 +23,10 @@
     }
 
 </style>
-
+<MudItem xs="12" Class="d-flex gap-1 flex-column align-center">
+    <MudText Color="Color.Primary" Typo="Typo.h4" Style="font-weight: 800; letter-spacing: 0.5rem;">REGISTER</MudText>
+    <MudImage Src="images/brand.svg" Height="330" />
+</MudItem>
 <MudItem xs="12" Class="d-flex flex-column align-center">
     <MudGrid Justify="Justify.Center">
         <MudItem xs="12" sm="8">
@@ -90,6 +94,15 @@
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
     MudTextField<string> pwField1;
     MudForm form;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.Initialize();
+        if (AuthService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("/profile");
+        }
+    }
 
     private RegisterRequest registerRequest = new RegisterRequest();
 

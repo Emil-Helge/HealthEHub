@@ -7,14 +7,17 @@
 
 <PageTitle>Profile</PageTitle>
 
+<MudItem xs="12" Class="d-flex flex-column align-center">
+    <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.h4" Style="font-weight: 800; letter-spacing: 0.5rem;">Your Workout Plans</MudText>
+    <MudImage Src="images/fitness-image-cube.svg" Height="330" />
+</MudItem>
 
-<MudItem xs="10" md="7" Class="mr-auto ml-auto">
-    <MudText Typo="Typo.h4" GutterBottom="true">Your Workout Plans</MudText>
+<MudItem xs="12" md="7" Class="d-flex gap-1 flex-column align-center">
     @if (workoutPlans == null)
     {
         <MudStack Row Spacing="3">
              <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-             <MudText Typo="Typo.body1">
+             <MudText Typo="Typo.body1" Class="pa-4" Align="Align.Center">
                  Loading plans...
              </MudText>
          </MudStack>
