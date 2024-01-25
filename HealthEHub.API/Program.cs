@@ -377,6 +377,9 @@ app.MapPut("/workoutplan/{id}", async (int id, List<SavedExercise> exercises, He
 })
 .WithName("UpdateWorkoutPlan").RequireAuthorization();
 
+app.MapGet("/check-authorization", () => Results.Ok())
+    .WithName("CheckAuthorization")
+    .RequireAuthorization();
 
 
 app.Run();
