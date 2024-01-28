@@ -83,7 +83,7 @@
         TargetMuscles = await Http.GetFromJsonAsync<string[]>("/targetmuscles");
         AllEquipment = await Http.GetFromJsonAsync<string[]>("/allequipment");
 
-        await LoadExercises(offset, countPerPage);
+        await ClearFilter();
         BodyParts = await Http.GetFromJsonAsync<string[]>("/bodyparts");
     }
 
