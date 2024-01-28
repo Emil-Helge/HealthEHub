@@ -10,16 +10,7 @@
 </MudItem>
 
 <MudGrid>
-    @if (isLoading)
-    {
-        for (int i = 0; i < countPerPage; i++)
-        {
-            <MudItem xs="12" lg="6" Style="padding: 0;">
-                <ExerciseCard />
-            </MudItem>
-        }
-    }
-    else if (displayedExercises is not null && displayedExercises.Count > 0)
+    @if (displayedExercises is not null && displayedExercises.Count > 0)
     {
         @foreach (Exercise exercise in displayedExercises)
         {
@@ -28,7 +19,17 @@
             </MudItem>
         }
     }
-    else
+
+    @if (isLoading)
+    {
+        for (int i = 0; i < countPerPage; i++)
+        {
+            <MudItem xs="12" lg="6">
+                <ExerciseCard />
+            </MudItem>
+        }
+    }
+    else if (displayedExercises is null || displayedExercises.Count == 0)
     {
         <MudItem xs="12" Class="d-flex flex-column align-center">
             <MudIcon Icon="@Icons.Material.Filled.SentimentNeutral" />
@@ -36,6 +37,7 @@
         </MudItem>
     }
 </MudGrid>
+
 
 <MudButton Style="max-height: 3rem;" Class="mt-2" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoadMoreExercises" Disabled="!hasMoreExercises || isLoading">
     @if (isLoading)
